@@ -1,0 +1,2241 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Gambizon E-commerce API",
+    "version": "1.0.0",
+    "description": "\n      Comprehensive REST API for Gambizon e-commerce platform.\n      \n      **Features:**\n      - JWT Authentication\n      - Product Management\n      - Shopping Cart\n      - Order Processing\n      - Parcel Delivery\n      - Image Upload (Cloudinary)\n      - Password Reset (Email)\n      \n      **Authentication:**\n      Most endpoints require JWT authentication. Click the \"Authorize\" button and enter: Bearer <your-token>\n    ",
+    "contact": {
+      "name": "Gambizon API Support",
+      "email": "support@gambizon.com"
+    },
+    "license": { "name": "ISC", "url": "https://opensource.org/licenses/ISC" }
+  },
+  "servers": [
+    { "url": "http://localhost:3000", "description": "Development server" },
+    { "url": "https://api.gambizon.com", "description": "Production server" }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "User registration, login, logout, and password reset"
+    },
+    { "name": "Products", "description": "Public product listing and search" },
+    {
+      "name": "Admin - Products",
+      "description": "Admin-only product management (Create, Update, Delete)"
+    },
+    { "name": "Cart", "description": "Shopping cart operations" },
+    { "name": "Orders", "description": "Order checkout and management" },
+    {
+      "name": "Admin - Orders",
+      "description": "Admin order management and status updates"
+    },
+    { "name": "Parcels", "description": "Parcel delivery requests" },
+    {
+      "name": "Admin - Parcels",
+      "description": "Admin parcel management and status updates"
+    },
+    { "name": "Addresses", "description": "User delivery address management" },
+    {
+      "name": "Upload",
+      "description": "Image upload for profiles and products"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter your JWT token in the format: Bearer <token>"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string", "example": "507f1f77bcf86cd799439011" },
+          "fullName": { "type": "string", "example": "John Doe" },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "john@example.com"
+          },
+          "phone": { "type": "string", "example": "+1234567890" },
+          "role": {
+            "type": "string",
+            "enum": ["USER", "ADMIN"],
+            "example": "USER"
+          },
+          "profileImage": {
+            "type": "string",
+            "nullable": true,
+            "example": "https://res.cloudinary.com/demo/image/upload/sample.jpg"
+          },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "john@example.com"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "example": "password123"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "john@example.com"
+          },
+          "password": { "type": "string", "example": "password123" }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "Login successful" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "user": { "$ref": "#/components/schemas/User" },
+              "token": {
+                "type": "string",
+                "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+              }
+            }
+          }
+        }
+      },
+      "ForgotPasswordRequest": {
+        "type": "object",
+        "required": ["email"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "john@example.com"
+          }
+        }
+      },
+      "ResetPasswordRequest": {
+        "type": "object",
+        "required": ["token", "newPassword", "confirmPassword"],
+        "properties": {
+          "token": { "type": "string", "example": "reset-token-from-email" },
+          "newPassword": {
+            "type": "string",
+            "minLength": 6,
+            "example": "newpassword123"
+          },
+          "confirmPassword": {
+            "type": "string",
+            "minLength": 6,
+            "example": "newpassword123"
+          }
+        }
+      },
+      "UpdateProfileRequest": {
+        "type": "object",
+        "properties": {
+          "fullName": { "type": "string", "example": "John Doe" },
+          "email": { "type": "string", "format": "email", "example": "john@example.com" },
+          "phone": { "type": "string", "example": "+1234567890" },
+          "profileImage": { "type": "string", "format": "binary", "description": "Profile image file (max 5MB, jpg/jpeg/png/webp)" }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string", "example": "507f1f77bcf86cd799439011" },
+          "name": { "type": "string", "example": "iPhone 15 Pro" },
+          "description": {
+            "type": "string",
+            "example": "Latest iPhone with advanced features"
+          },
+          "price": { "type": "number", "example": 999.99 },
+          "images": {
+            "type": "array",
+            "items": { "type": "string" },
+            "example": ["https://example.com/image1.jpg"]
+          },
+          "category": { "type": "string", "example": "Electronics" },
+          "stock": { "type": "number", "example": 50 },
+          "isActive": { "type": "boolean", "example": true },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ProductRequest": {
+        "type": "object",
+        "required": ["name", "price", "stock"],
+        "properties": {
+          "name": { "type": "string", "example": "iPhone 15 Pro" },
+          "description": {
+            "type": "string",
+            "example": "Latest iPhone with advanced features"
+          },
+          "price": { "type": "number", "example": 999.99 },
+          "images": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Array of existing image URLs",
+            "example": []
+          },
+          "category": { "type": "string", "example": "Electronics" },
+          "stock": { "type": "number", "example": 50 },
+          "isActive": { "type": "boolean", "example": true },
+          "productImages": {
+            "type": "array",
+            "items": { "type": "string", "format": "binary" },
+            "description": "Image files to upload to Cloudinary (max 5 files, 5MB each, jpg/jpeg/png/webp)"
+          }
+        }
+      },
+      "CartItem": {
+        "type": "object",
+        "properties": {
+          "productId": { "$ref": "#/components/schemas/Product" },
+          "quantity": { "type": "number", "example": 2 },
+          "priceAtTime": { "type": "number", "example": 999.99 }
+        }
+      },
+      "Cart": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string", "example": "507f1f77bcf86cd799439011" },
+          "userId": { "type": "string", "example": "507f1f77bcf86cd799439011" },
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CartItem" }
+          },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AddToCartRequest": {
+        "type": "object",
+        "required": ["productId", "quantity"],
+        "properties": {
+          "productId": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "quantity": { "type": "number", "example": 1 }
+        }
+      },
+      "UpdateCartRequest": {
+        "type": "object",
+        "required": ["productId", "quantity"],
+        "properties": {
+          "productId": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "quantity": { "type": "number", "example": 3 }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string", "example": "507f1f77bcf86cd799439011" },
+          "userId": { "type": "string", "example": "507f1f77bcf86cd799439011" },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "productId": { "type": "string" },
+                "quantity": { "type": "number" },
+                "priceAtTime": { "type": "number" }
+              }
+            }
+          },
+          "totalAmount": { "type": "number", "example": 1999.98 },
+          "paymentMethod": {
+            "type": "string",
+            "enum": ["STRIPE", "WAVE", "COD"],
+            "example": "COD"
+          },
+          "paymentStatus": {
+            "type": "string",
+            "enum": ["PENDING", "PAID", "FAILED"],
+            "example": "PENDING"
+          },
+          "orderStatus": {
+            "type": "string",
+            "enum": ["PENDING", "CONFIRMED", "DELIVERED"],
+            "example": "PENDING"
+          },
+          "deliveryAddress": {
+            "type": "string",
+            "example": "123 Main St, City, Country"
+          },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CheckoutRequest": {
+        "type": "object",
+        "required": ["paymentMethod", "deliveryAddress"],
+        "properties": {
+          "paymentMethod": {
+            "type": "string",
+            "enum": ["STRIPE", "WAVE", "COD"],
+            "example": "COD"
+          },
+          "deliveryAddress": {
+            "type": "string",
+            "example": "123 Main St, City, Country"
+          }
+        }
+      },
+      "UpdateOrderStatusRequest": {
+        "type": "object",
+        "required": ["orderStatus"],
+        "properties": {
+          "orderStatus": {
+            "type": "string",
+            "enum": ["PENDING", "CONFIRMED", "DELIVERED"],
+            "example": "CONFIRMED"
+          },
+          "paymentStatus": {
+            "type": "string",
+            "enum": ["PENDING", "PAID", "FAILED"],
+            "example": "PAID"
+          }
+        }
+      },
+      "Parcel": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string", "example": "507f1f77bcf86cd799439011" },
+          "userId": { "type": "string", "example": "507f1f77bcf86cd799439011" },
+          "pickupName": { "type": "string", "example": "John Doe" },
+          "pickupAddress": { "type": "string", "example": "123 Pickup St" },
+          "pickupPhone": { "type": "string", "example": "+1234567890" },
+          "dropoffName": { "type": "string", "example": "Jane Smith" },
+          "dropoffAddress": { "type": "string", "example": "456 Dropoff Ave" },
+          "dropoffPhone": { "type": "string", "example": "+0987654321" },
+          "packageSize": {
+            "type": "string",
+            "enum": ["SMALL", "MEDIUM", "LARGE"],
+            "example": "MEDIUM"
+          },
+          "notes": { "type": "string", "example": "Handle with care" },
+          "paymentMethod": {
+            "type": "string",
+            "enum": ["STRIPE", "WAVE", "COD"],
+            "example": "COD"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "PICKED", "DELIVERED"],
+            "example": "PENDING"
+          },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ParcelRequest": {
+        "type": "object",
+        "required": [
+          "pickupName",
+          "pickupAddress",
+          "pickupPhone",
+          "dropoffName",
+          "dropoffAddress",
+          "dropoffPhone",
+          "packageSize",
+          "paymentMethod"
+        ],
+        "properties": {
+          "pickupName": { "type": "string", "example": "John Doe" },
+          "pickupAddress": { "type": "string", "example": "123 Pickup St" },
+          "pickupPhone": { "type": "string", "example": "+1234567890" },
+          "dropoffName": { "type": "string", "example": "Jane Smith" },
+          "dropoffAddress": { "type": "string", "example": "456 Dropoff Ave" },
+          "dropoffPhone": { "type": "string", "example": "+0987654321" },
+          "packageSize": {
+            "type": "string",
+            "enum": ["SMALL", "MEDIUM", "LARGE"],
+            "example": "MEDIUM"
+          },
+          "notes": { "type": "string", "example": "Handle with care" },
+          "paymentMethod": {
+            "type": "string",
+            "enum": ["STRIPE", "WAVE", "COD"],
+            "example": "COD"
+          }
+        }
+      },
+      "UpdateParcelStatusRequest": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "PICKED", "DELIVERED"],
+            "example": "PICKED"
+          }
+        }
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string", "example": "507f1f77bcf86cd799439011" },
+          "userId": { "type": "string", "example": "507f1f77bcf86cd799439011" },
+          "fullName": { "type": "string", "example": "John Doe" },
+          "phone": { "type": "string", "example": "+1234567890" },
+          "address": { "type": "string", "example": "123 Main St, Apt 4B" },
+          "landmark": { "type": "string", "example": "Near Central Park" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AddressRequest": {
+        "type": "object",
+        "required": ["fullName", "phone", "address"],
+        "properties": {
+          "fullName": { "type": "string", "example": "John Doe" },
+          "phone": { "type": "string", "example": "+1234567890" },
+          "address": { "type": "string", "example": "123 Main St, Apt 4B" },
+          "landmark": { "type": "string", "example": "Near Central Park" }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "Operation successful" },
+          "data": { "type": "object" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string", "example": "Error message" }
+        }
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string", "example": "Validation failed" }
+        }
+      },
+      "UnauthorizedError": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": {
+            "type": "string",
+            "example": "Unauthorized. Please login."
+          }
+        }
+      },
+      "ForbiddenError": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": {
+            "type": "string",
+            "example": "Access denied. Admin only."
+          }
+        }
+      },
+      "NotFoundError": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string", "example": "Resource not found" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/addresses": {
+      "get": {
+        "summary": "Get user's addresses",
+        "tags": ["Addresses"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of user's addresses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "count": { "type": "number" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "addresses": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/Address" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" }
+        }
+      },
+      "post": {
+        "summary": "Create a new address",
+        "tags": ["Addresses"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AddressRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Address created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "address": { "$ref": "#/components/schemas/Address" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/schemas/ValidationError" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" }
+        }
+      }
+    },
+    "/addresses/{id}": {
+      "get": {
+        "summary": "Get single address by ID",
+        "tags": ["Addresses"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Address ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Address details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "address": { "$ref": "#/components/schemas/Address" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "404": { "$ref": "#/components/schemas/NotFoundError" }
+        }
+      },
+      "put": {
+        "summary": "Update an address",
+        "tags": ["Addresses"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Address ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AddressRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Address updated" },
+          "400": { "$ref": "#/components/schemas/ValidationError" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "404": { "$ref": "#/components/schemas/NotFoundError" }
+        }
+      },
+      "delete": {
+        "summary": "Delete an address",
+        "tags": ["Addresses"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Address ID"
+          }
+        ],
+        "responses": {
+          "200": { "description": "Address deleted" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "404": { "$ref": "#/components/schemas/NotFoundError" }
+        }
+      }
+    },
+    "/admin/orders": {
+      "get": {
+        "summary": "Get all orders (with optional status filter)",
+        "tags": ["Admin - Orders"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": ["PENDING", "CONFIRMED", "DELIVERED"]
+            },
+            "description": "Filter by order status"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of all orders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "count": { "type": "number" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "orders": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/Order" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "403": { "$ref": "#/components/schemas/ForbiddenError" }
+        }
+      }
+    },
+    "/admin/orders/{id}/status": {
+      "put": {
+        "summary": "Update order status",
+        "tags": ["Admin - Orders"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Order ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrderStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Order status updated" },
+          "400": { "description": "Invalid status transition" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "403": { "$ref": "#/components/schemas/ForbiddenError" },
+          "404": { "$ref": "#/components/schemas/NotFoundError" }
+        }
+      }
+    },
+    "/admin/parcels": {
+      "get": {
+        "summary": "Get all parcels (with optional status filter)",
+        "tags": ["Admin - Parcels"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": ["PENDING", "PICKED", "DELIVERED"]
+            },
+            "description": "Filter by parcel status"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of all parcels",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "count": { "type": "number" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "parcels": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/Parcel" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "403": { "$ref": "#/components/schemas/ForbiddenError" }
+        }
+      }
+    },
+    "/admin/parcels/{id}/status": {
+      "put": {
+        "summary": "Update parcel status",
+        "tags": ["Admin - Parcels"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Parcel ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateParcelStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Parcel status updated" },
+          "400": { "description": "Invalid status transition" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "403": { "$ref": "#/components/schemas/ForbiddenError" },
+          "404": { "$ref": "#/components/schemas/NotFoundError" }
+        }
+      }
+    },
+    "/admin/products": {
+      "get": {
+        "summary": "Get all products (including inactive)",
+        "tags": ["Admin - Products"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of all products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "count": { "type": "number" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "products": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/Product" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "403": { "$ref": "#/components/schemas/ForbiddenError" }
+        }
+      },
+      "post": {
+        "summary": "Create a new product (with optional image uploads)",
+        "tags": ["Admin - Products"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "price", "stock"],
+                "properties": {
+                  "name": { "type": "string", "example": "iPhone 15 Pro" },
+                  "description": { "type": "string", "example": "Latest iPhone with advanced features" },
+                  "price": { "type": "number", "example": 999.99 },
+                  "category": { "type": "string", "example": "Electronics" },
+                  "stock": { "type": "number", "example": 50 },
+                  "isActive": { "type": "boolean", "example": true },
+                  "images": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Optional array of existing image URLs"
+                  },
+                  "productImages": {
+                    "type": "array",
+                    "items": { "type": "string", "format": "binary" },
+                    "description": "Optional image files to upload (max 5, 5MB each, jpg/jpeg/png/webp)"
+                  }
+                }
+              }
+            },
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ProductRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "product": { "$ref": "#/components/schemas/Product" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/schemas/ValidationError" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "403": { "$ref": "#/components/schemas/ForbiddenError" }
+        }
+      }
+    },
+    "/admin/products/{id}": {
+      "put": {
+        "summary": "Update a product (with optional image uploads)",
+        "tags": ["Admin - Products"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "iPhone 15 Pro" },
+                  "description": { "type": "string", "example": "Latest iPhone with advanced features" },
+                  "price": { "type": "number", "example": 999.99 },
+                  "category": { "type": "string", "example": "Electronics" },
+                  "stock": { "type": "number", "example": 50 },
+                  "isActive": { "type": "boolean", "example": true },
+                  "images": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Array of image URLs to replace existing images"
+                  },
+                  "productImages": {
+                    "type": "array",
+                    "items": { "type": "string", "format": "binary" },
+                    "description": "New image files to upload and append (max 5, 5MB each)"
+                  }
+                }
+              }
+            },
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ProductRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Product updated" },
+          "400": { "$ref": "#/components/schemas/ValidationError" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "403": { "$ref": "#/components/schemas/ForbiddenError" },
+          "404": { "$ref": "#/components/schemas/NotFoundError" }
+        }
+      },
+      "delete": {
+        "summary": "Delete a product (soft delete)",
+        "tags": ["Admin - Products"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Product deleted" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "403": { "$ref": "#/components/schemas/ForbiddenError" },
+          "404": { "$ref": "#/components/schemas/NotFoundError" }
+        }
+      }
+    },
+    "/admin/products/{id}/images": {
+      "post": {
+        "summary": "Upload product images (multiple)",
+        "tags": ["Admin - Products"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Product ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "productImages": {
+                    "type": "array",
+                    "items": { "type": "string", "format": "binary" },
+                    "description": "Product images (max 5 files, 5MB each, jpg/jpeg/png/webp)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product images uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Product images uploaded successfully" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "product": {
+                          "type": "object",
+                          "properties": {
+                            "_id": { "type": "string" },
+                            "name": { "type": "string" },
+                            "images": { "type": "array", "items": { "type": "string" } }
+                          }
+                        },
+                        "uploadedImages": { "type": "array", "items": { "type": "string" } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/schemas/ValidationError" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "403": { "$ref": "#/components/schemas/ForbiddenError" },
+          "404": { "$ref": "#/components/schemas/NotFoundError" }
+        }
+      },
+      "delete": {
+        "summary": "Delete a single product image",
+        "tags": ["Admin - Products"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Product ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["imageUrl"],
+                "properties": {
+                  "imageUrl": {
+                    "type": "string",
+                    "description": "Full Cloudinary URL of the image to delete",
+                    "example": "https://res.cloudinary.com/demo/image/upload/sample.jpg"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product image deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Product image deleted successfully" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "product": {
+                          "type": "object",
+                          "properties": {
+                            "_id": { "type": "string" },
+                            "name": { "type": "string" },
+                            "images": { "type": "array", "items": { "type": "string" } }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/schemas/ValidationError" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "403": { "$ref": "#/components/schemas/ForbiddenError" },
+          "404": { "$ref": "#/components/schemas/NotFoundError" }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationError" }
+              }
+            }
+          },
+          "409": {
+            "description": "Email already registered",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login user and get JWT token",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing credentials",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationError" }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UnauthorizedError" }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/profile": {
+      "get": {
+        "summary": "Get current authenticated user profile",
+        "tags": ["Authentication"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": { "$ref": "#/components/schemas/User" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UnauthorizedError" }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/NotFoundError" }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update current user profile (with optional profile image)",
+        "tags": ["Authentication"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fullName": { "type": "string", "example": "John Doe" },
+                  "email": { "type": "string", "format": "email", "example": "john@example.com" },
+                  "phone": { "type": "string", "example": "+1234567890" },
+                  "profileImage": { "type": "string", "format": "binary", "description": "Profile image file (max 5MB, jpg/jpeg/png/webp)" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Profile updated successfully" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": { "$ref": "#/components/schemas/User" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationError" }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UnauthorizedError" }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/NotFoundError" }
+              }
+            }
+          },
+          "409": {
+            "description": "Email already registered",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Logout user (client should delete token)",
+        "tags": ["Authentication"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Logout successful",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UnauthorizedError" }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "summary": "Request password reset link",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ForgotPasswordRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reset link sent (or email doesn't exist message)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Email not provided",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationError" }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error or email sending failed",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "summary": "Reset password with token from email",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ResetPasswordRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset successful",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SuccessResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid token or validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationError" }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cart": {
+      "get": {
+        "summary": "Get user's cart",
+        "tags": ["Cart"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Cart retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "cart": { "$ref": "#/components/schemas/Cart" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" }
+        }
+      }
+    },
+    "/cart/add": {
+      "post": {
+        "summary": "Add item to cart",
+        "tags": ["Cart"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AddToCartRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Item added to cart" },
+          "400": { "description": "Validation error or insufficient stock" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "404": { "description": "Product not found" }
+        }
+      }
+    },
+    "/cart/update": {
+      "put": {
+        "summary": "Update item quantity in cart",
+        "tags": ["Cart"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateCartRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Cart updated" },
+          "400": { "description": "Validation error" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" }
+        }
+      }
+    },
+    "/cart/remove/{productId}": {
+      "delete": {
+        "summary": "Remove item from cart",
+        "tags": ["Cart"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "productId",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Product ID to remove"
+          }
+        ],
+        "responses": {
+          "200": { "description": "Item removed from cart" },
+          "400": { "description": "Invalid product ID" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" }
+        }
+      }
+    },
+    "/orders/checkout": {
+      "post": {
+        "summary": "Create order from cart",
+        "tags": ["Orders"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CheckoutRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "order": { "$ref": "#/components/schemas/Order" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Cart is empty or validation error" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" }
+        }
+      }
+    },
+    "/orders": {
+      "get": {
+        "summary": "Get user's orders",
+        "tags": ["Orders"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of user's orders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "count": { "type": "number" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "orders": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/Order" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" }
+        }
+      }
+    },
+    "/orders/{id}": {
+      "get": {
+        "summary": "Get single order by ID",
+        "tags": ["Orders"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Order ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "order": { "$ref": "#/components/schemas/Order" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "404": { "$ref": "#/components/schemas/NotFoundError" }
+        }
+      }
+    },
+    "/parcels": {
+      "post": {
+        "summary": "Create a parcel delivery request",
+        "tags": ["Parcels"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ParcelRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Parcel request created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "parcel": { "$ref": "#/components/schemas/Parcel" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/schemas/ValidationError" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" }
+        }
+      },
+      "get": {
+        "summary": "Get user's parcels",
+        "tags": ["Parcels"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of user's parcels",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "count": { "type": "number" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "parcels": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/Parcel" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" }
+        }
+      }
+    },
+    "/parcels/{id}": {
+      "get": {
+        "summary": "Get single parcel by ID",
+        "tags": ["Parcels"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Parcel ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parcel details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "parcel": { "$ref": "#/components/schemas/Parcel" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "404": { "$ref": "#/components/schemas/NotFoundError" }
+        }
+      }
+    },
+    "/payments/stripe/initiate": {
+      "post": {
+        "summary": "Initiate Stripe payment",
+        "description": "Create a payment intent for an order or parcel delivery",
+        "tags": ["Payments"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["relatedType", "relatedId"],
+                "properties": {
+                  "relatedType": {
+                    "type": "string",
+                    "enum": ["ORDER", "PARCEL"],
+                    "description": "Type of entity to pay for",
+                    "example": "ORDER"
+                  },
+                  "relatedId": {
+                    "type": "string",
+                    "description": "ID of the order or parcel",
+                    "example": "507f1f77bcf86cd799439011"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Payment initiated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": {
+                      "type": "string",
+                      "example": "Payment initiated successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "payment": {
+                          "type": "object",
+                          "properties": {
+                            "_id": { "type": "string" },
+                            "referenceId": { "type": "string" },
+                            "amount": { "type": "number" },
+                            "status": { "type": "string" },
+                            "relatedType": { "type": "string" },
+                            "relatedId": { "type": "string" },
+                            "createdAt": { "type": "string" }
+                          }
+                        },
+                        "clientSecret": {
+                          "type": "string",
+                          "description": "Stripe client secret for frontend"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid request or order already paid" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "403": { "description": "Not authorized to pay for this resource" },
+          "404": { "description": "Order or parcel not found" },
+          "503": { "description": "Payment service not configured" }
+        }
+      }
+    },
+    "/payments": {
+      "get": {
+        "summary": "Get user's payment history",
+        "tags": ["Payments"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of user's payments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "count": { "type": "number" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "payments": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/Payment" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" }
+        }
+      }
+    },
+    "/payments/{id}": {
+      "get": {
+        "summary": "Get payment by ID",
+        "tags": ["Payments"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Payment ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "payment": { "$ref": "#/components/schemas/Payment" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "403": { "description": "Not authorized to view this payment" },
+          "404": { "description": "Payment not found" }
+        }
+      }
+    },
+    "/payments/webhook": {
+      "post": {
+        "summary": "Stripe webhook endpoint",
+        "description": "Handle Stripe webhook events (payment success/failure)",
+        "tags": ["Payments"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "received": { "type": "boolean", "example": true }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Webhook signature verification failed" }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "summary": "Get all active products",
+        "tags": ["Products"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "category",
+            "schema": { "type": "string" },
+            "description": "Filter products by category (optional)",
+            "example": "Electronics"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of active products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "count": { "type": "number", "example": 10 },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "products": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/Product" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/category/{category}": {
+      "get": {
+        "summary": "Get products by category",
+        "tags": ["Products"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "category",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Product category",
+            "example": "Electronics"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Products in category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "count": { "type": "number" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "products": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/Product" }
+                        },
+                        "category": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Category not provided",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationError" }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}": {
+      "get": {
+        "summary": "Get single product by ID",
+        "tags": ["Products"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Product ID",
+            "example": "507f1f77bcf86cd799439011"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "product": { "$ref": "#/components/schemas/Product" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid product ID",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationError" }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/NotFoundError" }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/profile": {
+      "post": {
+        "summary": "Upload user profile image",
+        "tags": ["Upload"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Profile image file (max 5MB, jpg/jpeg/png)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile image uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "imageUrl": {
+                          "type": "string",
+                          "example": "https://res.cloudinary.com/demo/image/upload/v1/profile.jpg"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "No image provided or invalid format" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" }
+        }
+      },
+      "delete": {
+        "summary": "Delete user profile image",
+        "tags": ["Upload"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Profile image deleted" },
+          "400": { "description": "No profile image to delete" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" }
+        }
+      }
+    },
+    "/upload/product/{productId}": {
+      "post": {
+        "summary": "Upload product images (multiple)",
+        "tags": ["Upload"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "productId",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Product ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "images": {
+                    "type": "array",
+                    "items": { "type": "string", "format": "binary" },
+                    "description": "Product images (max 5 files, 5MB each, jpg/jpeg/png)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product images uploaded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "imageUrls": {
+                          "type": "array",
+                          "items": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "No images provided or invalid format" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "403": { "$ref": "#/components/schemas/ForbiddenError" },
+          "404": { "description": "Product not found" }
+        }
+      }
+    },
+    "/upload/product/{productId}/image": {
+      "delete": {
+        "summary": "Delete a single product image",
+        "tags": ["Upload"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "productId",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Product ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["imageUrl"],
+                "properties": {
+                  "imageUrl": {
+                    "type": "string",
+                    "description": "Full Cloudinary URL of the image to delete"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Product image deleted" },
+          "400": { "description": "Image URL not provided or not found" },
+          "401": { "$ref": "#/components/schemas/UnauthorizedError" },
+          "403": { "$ref": "#/components/schemas/ForbiddenError" },
+          "404": { "description": "Product not found" }
+        }
+      }
+    }
+  }
+}

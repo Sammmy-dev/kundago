@@ -1,0 +1,10 @@
+export { default as authRoutes } from './auth.routes.js';
+export { default as productRoutes } from './product.routes.js';
+export { default as adminProductRoutes } from './admin.product.routes.js';
+export { default as cartRoutes } from './cart.routes.js';
+export { default as orderRoutes } from './order.routes.js';
+export { default as adminOrderRoutes } from './admin.order.routes.js';
+export { default as parcelRoutes } from './parcel.routes.js';
+export { default as adminParcelRoutes } from './admin.parcel.routes.js';
+export { default as addressRoutes } from './address.routes.js';
+export { default as paymentRoutes } from './payment.routes.js';
