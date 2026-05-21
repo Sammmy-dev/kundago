@@ -1,12 +1,12 @@
-# Gambizon Backend – AI Build Instructions
+# Kundago Backend – AI Build Instructions
 
-This README serves as a **complete specification and instruction manual** for building the Gambizon backend system. It is written to be consumed by an **AI development tool or human developer** to implement the backend **correctly, consistently, and within scope**.
+This README serves as a **complete specification and instruction manual** for building the Kundago backend system. It is written to be consumed by an **AI development tool or human developer** to implement the backend **correctly, consistently, and within scope**.
 
 ---
 
 ## 1. Project Overview
 
-The Gambizon project requires **building a backend only** to integrate with an **existing FlutterFlow frontend**.
+The Kundago project requires **building a backend only** to integrate with an **existing React Native frontend**.
 
 ### Business Context
 - Single-vendor e‑commerce system
@@ -15,7 +15,7 @@ The Gambizon project requires **building a backend only** to integrate with an *
 - Phase 1 scope only (no real‑time tracking, no drivers)
 
 ### Frontend
-- Built with **FlutterFlow**
+- Built with **React Native**
 - Consumes **REST APIs**
 - Uses **JWT authentication**
 
@@ -45,7 +45,7 @@ The backend **must** be implemented using the following technologies:
 
 1. Backend is **stateless**
 2. All frontend interaction happens via REST APIs
-3. FlutterFlow stores and sends JWT tokens
+3. ReactNative stores and sends JWT tokens
 4. Admin and User are separated by **role-based access control**
 5. Payments and logistics statuses are **independent**
 6. No real-time features in Phase 1
@@ -357,7 +357,7 @@ PENDING → PAID
 ## 13. Expected Outcome
 
 The backend must:
-- Fully support the FlutterFlow frontend
+- Fully support the React Native frontend
 - Be scalable and maintainable
 - Follow the defined workflows exactly
 - Avoid over-engineering

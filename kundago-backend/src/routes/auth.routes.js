@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login, getProfile, updateProfile, logout, forgotPassword, verifyOTP, resetPassword } from '../controllers/auth.controller.js';
+import { register, login, getProfile, updateProfile, logout, forgotPassword, verifyOTP, resetPassword, sendVerification, verifyEmail } from '../controllers/auth.controller.js';
 import { requireAuth } from '../middleware/index.js';
 import { uploadUserProfile, handleUploadError, requireCloudinaryConfig } from '../middleware/upload.js';
 
@@ -129,6 +129,7 @@ router.post('/login', login);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/profile', requireAuth, getProfile);
+router.get('/me', requireAuth, getProfile);
 
 /**
  * @swagger
@@ -357,5 +358,58 @@ router.post('/verify-otp', verifyOTP);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post('/reset-password', resetPassword);
+
+/**
+ * @swagger
+ * /auth/send-verification:
+ *   post:
+ *     summary: Send email verification OTP
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Verification code sent
+ *       500:
+ *         description: Failed to send
+ */
+router.post('/send-verification', sendVerification);
+
+/**
+ * @swagger
+ * /auth/verify-email:
+ *   post:
+ *     summary: Verify email with OTP
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - otp
+ *             properties:
+ *               email:
+ *                 type: string
+ *               otp:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Email verified
+ *       400:
+ *         description: Invalid or expired code
+ */
+router.post('/verify-email', verifyEmail);
 
 export default router;

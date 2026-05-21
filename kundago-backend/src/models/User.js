@@ -63,6 +63,18 @@ const userSchema = new mongoose.Schema(
     resetPasswordOTPExpires: {
       type: Date,
       default: null
+    },
+    isVerified: {
+      type: Boolean,
+      default: false
+    },
+    emailVerificationOTP: {
+      type: String,
+      default: null
+    },
+    emailVerificationOTPExpires: {
+      type: Date,
+      default: null
     }
   },
   {
@@ -185,6 +197,40 @@ userSchema.methods.createPasswordResetToken = function () {
   this.resetPasswordExpires = Date.now() + 60 * 60 * 1000; // 1 hour
 
   return resetToken;
+};
+
+/**
+ * Instance method to generate email verification OTP
+ * @returns {string} OTP code
+ */
+userSchema.methods.createEmailVerificationOTP = function () {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  this.emailVerificationOTP = crypto
+    .createHash('sha256')
+    .update(otp)
+    .digest('hex');
+
+  this.emailVerificationOTPExpires = Date.now() + 10 * 60 * 1000;
+
+  return otp;
+};
+
+/**
+ * Instance method to verify email OTP
+ * @param {string} candidateOTP - OTP to verify
+ * @returns {boolean} True if valid
+ */
+userSchema.methods.verifyEmailOTP = function (candidateOTP) {
+  const hashedOTP = crypto
+    .createHash('sha256')
+    .update(candidateOTP)
+    .digest('hex');
+
+  return (
+    this.emailVerificationOTP === hashedOTP &&
+    this.emailVerificationOTPExpires > Date.now()
+  );
 };
 
 /**

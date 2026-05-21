@@ -1,65 +1,155 @@
-# Design System Document
- 
-## 1. Overview & Creative North Star: "The Architectural Editorial"
-This design system moves away from the generic "tech-startup" aesthetic to embrace a high-end, editorial feel specifically tailored for a premium HR staffing agency. The Creative North Star is **The Architectural Editorial**.
- 
-In this system, we treat digital space like the layout of a luxury print magazine or a modern gallery. We reject the "boxed-in" nature of traditional web design. Instead of confining talent and opportunities within rigid borders, we use **intentional asymmetry**, **extreme whitespace**, and **typographic dominance** to create a sense of authority and prestige. The goal is to make every candidate profile and job posting feel like a featured article in an industry-leading publication.
- 
-## 2. Colors & Surface Philosophy
-The palette is built on a foundation of stark whites and high-contrast crimsons, creating a visual rhythm that is both energetic and disciplined.
- 
-### Palette Highlights
-*   **Primary (#9e0000):** Used for "Brand Moments"—the core identity markers.
-*   **Primary Container (#cc0000):** A vibrant, high-action red for primary calls to action.
-*   **Secondary (#b52619):** A deeper tone for interactive states and secondary focus.
-*   **Surface Tiers:** We utilize `surface-container-lowest` (#ffffff) through `surface-dim` (#dadada) to create structure without lines.
- 
-### The "No-Line" Rule
-Traditional 1px borders are prohibited for sectioning content. To separate a "Job Search" section from a "Featured Talent" section, transition the background from `surface` (#f9f9f9) to `surface-container-low` (#f3f3f3). Boundaries are felt through tonal shifts, not seen through strokes.
- 
-### Glass & Gradient Rule
-To prevent the design from feeling "flat" or "cheap," use **Glassmorphism** for floating elements (like navigation bars or sticky filters). Apply `surface-container-lowest` at 80% opacity with a `24px` backdrop blur. For primary CTAs, apply a subtle linear gradient from `primary` (#9e0000) to `primary_container` (#cc0000) at a 135-degree angle to add depth and "soul."
- 
-## 3. Typography: The Voice of Authority
-We utilize **Inter** across the entire scale. The luxury feel is achieved through exaggerated scale contrasts—very large displays paired with generous letter spacing in labels.
- 
-*   **Display (lg/md/sm):** These are your "Editorial Statements." Use them for hero sections and key value propositions. (3.5rem to 2.25rem).
-*   **Headline (lg/md/sm):** Used for section titles. Ensure headlines have at least 48px of top margin to allow the typography to breathe.
-*   **Body (lg/md):** Set to `on-surface-variant` (#5e3f3a) to reduce harsh contrast and improve long-form readability.
-*   **Labels (md/sm):** Always uppercase with `0.05em` letter-spacing to denote professional categorization.
- 
-## 4. Elevation & Depth
-In this system, depth is a product of light and layering, not artificial outlines.
- 
-*   **The Layering Principle:** Stack surfaces to create focus. Place a `surface-container-lowest` card (the "Paper") on top of a `surface-container-low` background (the "Table"). This 1-step shift in hex value provides all the visual affordance needed for a high-end UI.
-*   **Ambient Shadows:** For floating elements (Modals, Hovered Cards), use an extra-diffused shadow: `0px 20px 40px rgba(158, 0, 0, 0.05)`. Note the use of a primary-tinted shadow rather than black; this mimics the way red light reflects off a premium surface.
-*   **The "Ghost Border" Fallback:** If a container (like an input field) requires a boundary, use `outline-variant` (#e8bdb6) at **15% opacity**. It should be a whisper, not a shout.
- 
-## 5. Components
- 
-### Buttons
-*   **Primary:** Gradient fill (`primary` to `primary_container`), `on-primary` text, `0.25rem` (sm) corner radius. High-end design favors the subtle "sm" radius over fully rounded "pills."
-*   **Secondary:** Ghost style. No background, `0.25rem` radius, `outline-variant` at 20% opacity. Text in `primary`.
- 
-### Cards & Lists
-*   **The "No-Divider" Rule:** Vertical lists of candidates or jobs must not use horizontal lines. Use 24px of `body-md` spacing and a background shift on hover (`surface-container-high`) to define rows.
-*   **Candidate Cards:** Use `surface-container-lowest` with a "Ghost Border." Apply an asymmetrical layout: Image on the left, name in `headline-sm` at the top right, and tags (Chips) tucked into the bottom right.
- 
-### Input Fields
-*   **Styling:** Minimalist bottom-border only, or a subtle `surface-container-highest` background fill. Avoid the "four-sided box" look. 
-*   **States:** On focus, the bottom border transitions to `primary` (#9e0000) with a 2px weight.
- 
-### Signature Component: The "Talent Spotlight"
-A large-scale carousel component using `display-md` typography that overlaps a high-quality, desaturated portrait. The text should use a `backdrop-blur` "Glass" pane to ensure legibility where it overlaps the image.
- 
-## 6. Do's and Don'ts
- 
-### Do
-*   **Do** use asymmetrical margins (e.g., 10% left margin, 20% right margin) for editorial layouts.
-*   **Do** embrace "dead space." If a section feels empty, it’s likely working.
-*   **Do** use the `primary` red sparingly. It should be a surgical strike of color, not a wash.
- 
-### Don't
-*   **Don't** use 1px solid black or grey borders. This immediately destroys the premium feel.
-*   **Don't** use "Pill" shapes for buttons unless they are secondary filter chips. Use the `0.25rem` (DEFAULT) roundedness for a more architectural, stable look.
-*   **Don't** use standard "Drop Shadows" (e.g., `0 2 4 black`). Always tint and diffuse your shadows to maintain a soft, ambient environment.
+---
+name: Vibrant Urban Mobility
+colors:
+  surface: '#f7f9fb'
+  surface-dim: '#d8dadc'
+  surface-bright: '#f7f9fb'
+  surface-container-lowest: '#ffffff'
+  surface-container-low: '#f2f4f6'
+  surface-container: '#eceef0'
+  surface-container-high: '#e6e8ea'
+  surface-container-highest: '#e0e3e5'
+  on-surface: '#191c1e'
+  on-surface-variant: '#3d4a3d'
+  inverse-surface: '#2d3133'
+  inverse-on-surface: '#eff1f3'
+  outline: '#6d7b6c'
+  outline-variant: '#bccbb9'
+  surface-tint: '#006e2f'
+  primary: '#006e2f'
+  on-primary: '#ffffff'
+  primary-container: '#22c55e'
+  on-primary-container: '#004b1e'
+  inverse-primary: '#4ae176'
+  secondary: '#565e74'
+  on-secondary: '#ffffff'
+  secondary-container: '#dae2fd'
+  on-secondary-container: '#5c647a'
+  tertiary: '#505f76'
+  on-tertiary: '#ffffff'
+  tertiary-container: '#9dadc6'
+  on-tertiary-container: '#314156'
+  error: '#ba1a1a'
+  on-error: '#ffffff'
+  error-container: '#ffdad6'
+  on-error-container: '#93000a'
+  primary-fixed: '#6bff8f'
+  primary-fixed-dim: '#4ae176'
+  on-primary-fixed: '#002109'
+  on-primary-fixed-variant: '#005321'
+  secondary-fixed: '#dae2fd'
+  secondary-fixed-dim: '#bec6e0'
+  on-secondary-fixed: '#131b2e'
+  on-secondary-fixed-variant: '#3f465c'
+  tertiary-fixed: '#d3e4fe'
+  tertiary-fixed-dim: '#b7c8e1'
+  on-tertiary-fixed: '#0b1c30'
+  on-tertiary-fixed-variant: '#38485d'
+  background: '#f7f9fb'
+  on-background: '#191c1e'
+  surface-variant: '#e0e3e5'
+typography:
+  display-lg:
+    fontFamily: Hanken Grotesk
+    fontSize: 48px
+    fontWeight: '800'
+    lineHeight: 56px
+    letterSpacing: -0.02em
+  display-lg-mobile:
+    fontFamily: Hanken Grotesk
+    fontSize: 32px
+    fontWeight: '800'
+    lineHeight: 40px
+    letterSpacing: -0.02em
+  headline-md:
+    fontFamily: Hanken Grotesk
+    fontSize: 24px
+    fontWeight: '700'
+    lineHeight: 32px
+  body-lg:
+    fontFamily: Inter
+    fontSize: 18px
+    fontWeight: '400'
+    lineHeight: 28px
+  body-md:
+    fontFamily: Inter
+    fontSize: 16px
+    fontWeight: '400'
+    lineHeight: 24px
+  label-sm:
+    fontFamily: JetBrains Mono
+    fontSize: 12px
+    fontWeight: '500'
+    lineHeight: 16px
+    letterSpacing: 0.05em
+rounded:
+  sm: 0.25rem
+  DEFAULT: 0.5rem
+  md: 0.75rem
+  lg: 1rem
+  xl: 1.5rem
+  full: 9999px
+spacing:
+  base: 4px
+  xs: 4px
+  sm: 8px
+  md: 16px
+  lg: 24px
+  xl: 40px
+  gutter: 16px
+  margin-mobile: 16px
+  margin-desktop: 64px
+---
+
+## Brand & Style
+The design system is engineered for the high-velocity world of urban mobility and transit. It evokes a sense of efficiency, reliability, and modern movement. The brand personality is energetic yet organized, catering to commuters and travelers who value speed and clarity.
+
+The aesthetic follows a **Corporate / Modern** approach with a high-energy twist. It utilizes expansive whitespace, precise grid alignment, and purposeful motion to guide the user through complex navigation tasks. The interface is designed to feel like a high-end dashboard: functional, performance-oriented, and unmistakably contemporary.
+
+## Colors
+The color palette is anchored by a **Vibrant Mobility Green**, symbolizing movement, "go" signals, and eco-friendly transit. 
+
+- **Primary (#22C55E):** Used for critical action buttons, active states, and success indicators.
+- **Secondary (#0F172A):** A deep midnight navy used for high-contrast headers, primary text, and grounding elements.
+- **Tertiary (#64748B):** A muted slate for secondary information, icons, and supporting borders.
+- **Neutral (#F8FAFC):** A clean, cool off-white background to maintain high legibility and a spacious feel.
+
+All primary color tokens across the system must utilize the Mobility Green to ensure a consistent visual "pulse" throughout the user journey.
+
+## Typography
+The typography strategy prioritizes rapid scannability and technical precision. 
+
+- **Headlines:** Uses **Hanken Grotesk** for a sharp, contemporary look that feels engineered and precise.
+- **Body:** **Inter** provides a highly functional, neutral foundation for descriptions and UI copy, ensuring legibility at all sizes.
+- **Data & Labels:** **JetBrains Mono** is used for time-stamps, route numbers, and technical data points, reinforcing the "system-driven" nature of mobility.
+
+Use tight letter-spacing on display headings to maintain a compact, high-impact feel.
+
+## Layout & Spacing
+This design system utilizes a **Fluid Grid** based on a 4px baseline shift. 
+
+- **Mobile:** 4-column grid with 16px margins.
+- **Tablet:** 8-column grid with 24px margins.
+- **Desktop:** 12-column grid with 64px margins and a maximum content container of 1280px.
+
+Spacing is aggressive and structured. Use "md" (16px) for internal card padding and "xl" (40px) to separate major sections. This creates a rhythmic, organized flow that mimics the structured nature of transit schedules.
+
+## Elevation & Depth
+Visual hierarchy is achieved through **Tonal Layers** and subtle **Ambient Shadows**. 
+
+- **Surface Levels:** The base background is the neutral hex. Elevated elements (cards, menus) use a pure white surface.
+- **Shadows:** Use a single, very soft shadow style for floating elements: `0px 4px 20px rgba(15, 23, 42, 0.08)`. 
+- **Interaction:** On hover, buttons do not gain elevation but instead shift in color brightness. Only "active" overlays like modals should use a backdrop blur (8px) to isolate the user's focus from the background noise of the map or list.
+
+## Shapes
+The shape language is **Rounded**, striking a balance between the organic nature of human movement and the rigid geometry of urban architecture. 
+
+Standard components (inputs, cards, buttons) use a 0.5rem (8px) radius. This provides a approachable, modern feel without being overly "bubbly" or playful, maintaining the professional integrity of the mobility service.
+
+## Components
+- **Buttons:** Primary buttons feature the Mobility Green background with white text. Use "Hanken Grotesk" Bold for button labels to ensure they stand out as the primary call to action.
+- **Chips:** Used for transit modes (Bus, Train, Bike). These should have a light tint of the primary color or secondary color with a matching border.
+- **Input Fields:** 1px solid border (#64748B) that thickens and changes to Mobility Green (#22C55E) on focus.
+- **Cards:** White background, 8px radius, and a subtle 1px border (#F1F5F9). Use for route options and trip summaries.
+- **Navigation Bar:** Fixed at the bottom for mobile, top for desktop. Uses the Secondary Navy background with high-contrast icons for maximum thumb-reach usability and visibility in outdoor light.
+- **Live Indicators:** Pulsing animations for real-time tracking should strictly use the Mobility Green to indicate active, live status.

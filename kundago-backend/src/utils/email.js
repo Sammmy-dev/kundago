@@ -352,9 +352,86 @@ export const sendOrderConfirmation = async (to, userName, orderId, totalAmount, 
   }
 };
 
+/**
+ * Send email verification OTP
+ * @param {string} to - Recipient email address
+ * @param {string} otp - One-Time Password
+ * @param {string} userName - User's full name
+ * @returns {Promise<Object>} Resend response
+ */
+export const sendVerificationEmail = async (to, otp, userName) => {
+  try {
+    if (!env.resendApiKey) return;
+
+    const name = userName || 'there';
+
+    await resend.emails.send({
+      from: env.resendFromEmail,
+      to,
+      subject: 'Verify your email - KundaGo',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Verify Your Email</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+            .container { background-color: #f9f9f9; border-radius: 8px; padding: 30px; border: 1px solid #ddd; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .header h1 { color: #22c55e; margin: 0; }
+            .content { background-color: white; padding: 20px; border-radius: 6px; }
+            .otp-code {
+              font-family: 'Courier New', monospace;
+              font-size: 32px;
+              font-weight: bold;
+              letter-spacing: 5px;
+              color: #22c55e;
+              background-color: #f0fdf4;
+              padding: 15px;
+              text-align: center;
+              border-radius: 5px;
+              border: 2px dashed #22c55e;
+              margin: 20px 0;
+            }
+            .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #777; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Welcome to KundaGo!</h1>
+            </div>
+            <div class="content">
+              <p>Hello ${name},</p>
+              <p>Thank you for creating an account. Please verify your email address using the code below:</p>
+              <div class="otp-code">${otp}</div>
+              <p>This code will expire in 10 minutes.</p>
+              <p>If you didn't create this account, please ignore this email.</p>
+              <p>Best regards,<br>The KundaGo Team</p>
+            </div>
+            <div class="footer">
+              <p>This is an automated email. Please do not reply.</p>
+              <p>&copy; ${new Date().getFullYear()} KundaGo. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    });
+
+    logger.info('Verification email sent', { to });
+  } catch (error) {
+    logger.error('Failed to send verification email', { to, error: error.message });
+    throw error;
+  }
+};
+
 export default {
   sendPasswordResetEmail,
   sendPasswordResetConfirmation,
   sendWelcomeEmail,
-  sendOrderConfirmation
+  sendOrderConfirmation,
+  sendVerificationEmail
 };
