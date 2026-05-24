@@ -6,11 +6,11 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
+  Image,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/stores/auth';
 
@@ -22,6 +22,7 @@ export default function SignInScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSignIn = async () => {
     setError('');
@@ -56,21 +57,28 @@ export default function SignInScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1"
+    <KeyboardAwareScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      keyboardShouldPersistTaps="handled"
+      enableOnAndroid
+      extraScrollHeight={100}
+      className="bg-surface"
     >
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        className="bg-surface"
-      >
-        <View className="flex-1 px-6 py-10 justify-center">
-          <View className="mb-10 items-center">
-            <Text className="display-lg-mobile text-primary mb-2">
-              KundaGo
-            </Text>
+      <View className="flex-1 px-6 py-10 justify-center">
+          <View className="mb-10 mt-10 items-center">
+            <View className="items-center gap-2">
+              <Image
+                source={require('@/assets/images/kungaGo_logo.png')}
+                className="w-40 h-40 relative right-2 -bottom-4"
+                resizeMode="cover"
+              />
+              <Text className="headline-md text-primary text-4xl">
+                <Text>Kunda</Text>
+                <Text style={{ color: '#ef4444' }}>Go</Text>
+              </Text>
+            </View>
             <Text className="body-md text-on-surface text-center">
-              Welcome back to your mobility hub
+              Welcome back to your one-stop shop
             </Text>
           </View>
 
@@ -103,7 +111,7 @@ export default function SignInScreen() {
                 paddingHorizontal: 16,
                 paddingVertical: 16,
                 fontSize: 16,
-                color: '#191c1e',
+                color: '#ffffff',
               }}
             />
           </View>
@@ -112,25 +120,38 @@ export default function SignInScreen() {
             <Text className="label-sm text-on-surface mb-2">
               Password
             </Text>
-            <TextInput
-              placeholder="••••••••"
-              placeholderTextColor="#3d4a3d"
-              value={password}
-              onChangeText={setPassword}
-              editable={!loading}
-              secureTextEntry
-              onFocus={() => setFocusedField('password')}
-              onBlur={() => setFocusedField(null)}
-              style={{
-                borderWidth: 1,
-                borderColor: focusedField === 'password' ? '#006e2f' : '#6d7b6c',
-                borderRadius: 4,
-                paddingHorizontal: 16,
-                paddingVertical: 16,
-                fontSize: 16,
-                color: '#191c1e',
-              }}
-            />
+            <View className="relative">
+              <TextInput
+                placeholder="••••••••"
+                placeholderTextColor="#3d4a3d"
+                value={password}
+                onChangeText={setPassword}
+                editable={!loading}
+                secureTextEntry={!showPassword}
+                onFocus={() => setFocusedField('password')}
+                onBlur={() => setFocusedField(null)}
+                style={{
+                  borderWidth: 1,
+                  borderColor: focusedField === 'password' ? '#006e2f' : '#6d7b6c',
+                  borderRadius: 4,
+                  paddingHorizontal: 16,
+                  paddingVertical: 16,
+                  paddingRight: 48,
+                  fontSize: 16,
+                  color: '#ffffff',
+                }}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword((p) => !p)}
+                className="absolute right-3 top-0 bottom-0 justify-center"
+              >
+                <Ionicons
+                  name={showPassword ? 'eye-off' : 'eye'}
+                  size={22}
+                  color="#6d7b6c"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <TouchableOpacity className="mb-10">
@@ -166,7 +187,6 @@ export default function SignInScreen() {
             </Link>
           </View>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
   );
 }

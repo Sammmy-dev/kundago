@@ -6,7 +6,7 @@ This README serves as a **complete specification and instruction manual** for bu
 
 ## 1. Project Overview
 
-The Kundago project requires **building a backend only** to integrate with an **existing React Native frontend**.
+The Kundago project requires **building a backend only** to integrate with an **existing React Native frontend**, The currency used is Gambia Dalasi (GMD).
 
 ### Business Context
 - Single-vendor e‑commerce system

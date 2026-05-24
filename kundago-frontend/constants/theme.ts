@@ -1,3 +1,5 @@
+import { useThemeStore } from '@/lib/stores/theme';
+
 export const Colors = {
   primary: {
     DEFAULT: '#006e2f',
@@ -31,6 +33,11 @@ export const Colors = {
     DEFAULT: '#f7f9fb',
     dim: '#d8dadc',
     bright: '#f7f9fb',
+    containerLowest: '#ffffff',
+    containerLow: '#f2f4f6',
+    container: '#eceef0',
+    containerHigh: '#e6e8ea',
+    containerHighest: '#e0e3e5',
   },
   onSurface: '#191c1e',
   onSurfaceVariant: '#3d4a3d',
@@ -39,7 +46,72 @@ export const Colors = {
     container: '#ffdad6',
   },
   outline: '#6d7b6c',
+  inverseSurface: '#2d3133',
+  inverseOnSurface: '#eff1f3',
+  inversePrimary: '#4ae176',
+  background: '#f7f9fb',
+  onBackground: '#191c1e',
+  surfaceVariant: '#e0e3e5',
 };
+
+export const DarkColors = {
+  primary: {
+    DEFAULT: '#006e2f',
+    50: '#0c2818',
+    100: '#145231',
+    200: '#166534',
+    300: '#15803d',
+    400: '#16a34a',
+    500: '#22c55e',
+    600: '#4ae176',
+    700: '#86efac',
+    800: '#bbf7d0',
+    900: '#dcfce7',
+    950: '#f0fdf4',
+    container: '#15803d',
+  },
+  secondary: {
+    DEFAULT: '#dae2fd',
+    50: '#020617',
+    100: '#0f172a',
+    200: '#1e293b',
+    300: '#334155',
+    400: '#475569',
+    500: '#64748b',
+    600: '#94a3b8',
+    700: '#cbd5e1',
+    800: '#e2e8f0',
+    900: '#f1f5f9',
+  },
+  surface: {
+    DEFAULT: '#121415',
+    dim: '#0b0d0e',
+    bright: '#3b3d3e',
+    containerLowest: '#0c0e0f',
+    containerLow: '#1a1c1e',
+    container: '#1e2022',
+    containerHigh: '#282a2c',
+    containerHighest: '#333537',
+  },
+  onSurface: '#e1e3e5',
+  onSurfaceVariant: '#bcc9bc',
+  error: {
+    DEFAULT: '#ffb4ab',
+    container: '#93000a',
+  },
+  outline: '#869486',
+  inverseSurface: '#e1e3e5',
+  inverseOnSurface: '#2d3133',
+  inversePrimary: '#006e2f',
+  background: '#121415',
+  onBackground: '#e1e3e5',
+  surfaceVariant: '#3d403d',
+};
+
+export function useThemeColors() {
+  const isDark = useThemeStore((s) => s.isDark);
+  return isDark ? DarkColors : Colors;
+}
 
 export const Spacing = {
   xs: 4,

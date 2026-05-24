@@ -6,6 +6,7 @@ type User = {
   email: string;
   phone?: string;
   role: 'USER' | 'ADMIN';
+  profileImage?: string | null;
 };
 
 type AuthState = {

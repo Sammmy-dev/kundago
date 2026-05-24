@@ -1,7 +1,7 @@
 import { Order, Cart, Product, User } from '../models/index.js';
 import { PAYMENT_METHODS } from '../models/Order.js';
 import { logger } from '../config/index.js';
-import { sendOrderConfirmation } from '../utils/email.js';
+import { sendOrderPlaced, sendOrderConfirmation } from '../utils/email.js';
 
 /**
  * @desc    Checkout - Create order from cart
@@ -136,14 +136,14 @@ export const checkout = async (req, res) => {
     // Populate product details for response
     await order.populate('items.productId', 'name images');
 
-    // Send Order Confirmation Email (fire-and-forget, non-blocking)
+    // Send Order Placed Email (fire-and-forget, non-blocking)
     User.findById(userId)
       .then((user) => {
         if (user && user.email) {
-          return sendOrderConfirmation(user.email, user.fullName, order._id, totalAmount, paymentMethod);
+          return sendOrderPlaced(user.email, user.fullName, order._id, totalAmount, paymentMethod);
         }
       })
-      .catch((e) => logger.error('Failed to send order confirmation email', { error: e.message }));
+      .catch((e) => logger.error('Failed to send order placed email', { error: e.message }));
 
     res.status(201).json({
       success: true,
@@ -447,6 +447,17 @@ export const updateOrderStatus = async (req, res) => {
       orderId: order._id,
       newStatus: orderStatus
     });
+
+    // Send confirmation email when status changes to CONFIRMED
+    if (orderStatus === 'CONFIRMED') {
+      User.findById(order.user)
+        .then((user) => {
+          if (user && user.email) {
+            return sendOrderConfirmation(user.email, user.fullName, order._id, order.totalAmount, order.paymentMethod);
+          }
+        })
+        .catch((e) => logger.error('Failed to send order confirmation email', { error: e.message }));
+    }
 
     res.status(200).json({
       success: true,

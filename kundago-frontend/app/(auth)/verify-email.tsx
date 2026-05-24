@@ -1,23 +1,17 @@
 import '@/global.css';
 import { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/stores/auth';
 
 export default function VerifyEmailScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const setAuth = useAuthStore((s) => s.setAuth);
   const { email } = useLocalSearchParams<{ email: string }>();
+  const { width } = useWindowDimensions();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
@@ -25,6 +19,8 @@ export default function VerifyEmailScreen() {
   const [countdown, setCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const inputRef = useRef<TextInput>(null);
+
+  const boxSize = Math.min(52, (width - 48 - 60) / 6);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -45,24 +41,15 @@ export default function VerifyEmailScreen() {
       setError('Please enter the full 6-digit code');
       return;
     }
-
     setError('');
     setLoading(true);
-
     try {
-      const res = await api.post('/auth/verify-email', {
-        email,
-        otp: code,
-      });
-
+      const res = await api.post('/auth/verify-email', { email, otp: code });
       const data = res.data;
       setAuth(data.data.token, data.data.user);
       router.replace('/(tabs)');
     } catch (err: any) {
-      const message =
-        err.response?.data?.message ||
-        'Invalid or expired code. Please try again.';
-      setError(message);
+      setError(err.response?.data?.message || 'Invalid or expired code. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -71,19 +58,14 @@ export default function VerifyEmailScreen() {
   const handleResend = async () => {
     setResending(true);
     setError('');
-
     try {
       await api.post('/auth/send-verification', { email });
-
       setCountdown(60);
       setCanResend(false);
       setCode('');
       inputRef.current?.focus();
     } catch (err: any) {
-      const message =
-        err.response?.data?.message ||
-        'Failed to resend code. Please try again.';
-      setError(message);
+      setError(err.response?.data?.message || 'Failed to resend code. Please try again.');
     } finally {
       setResending(false);
     }
@@ -96,105 +78,32 @@ export default function VerifyEmailScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1 }}
-    >
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        className="bg-surface"
-      >
-        <View
-          style={{
-            flex: 1,
-            paddingHorizontal: 24,
-            paddingVertical: 40,
-            justifyContent: 'center',
-          }}
-        >
-          <View style={{ alignItems: 'center', marginBottom: 40 }}>
-            <View
-              style={{
-                width: 80,
-                height: 80,
-                borderRadius: 40,
-                backgroundColor: '#f0fdf4',
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginBottom: 24,
-              }}
-            >
-              <Text style={{ fontSize: 36 }}>✉️</Text>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="bg-surface">
+        <View style={{ paddingTop: insets.top }} className="flex-1 justify-center px-6 py-10">
+          <View className="items-center mb-10">
+            <View className="w-20 h-20 bg-primary-50 rounded-full items-center justify-center mb-6">
+              <Text className="text-3xl">✉️</Text>
             </View>
-            <Text
-              style={{
-                fontSize: 24,
-                fontWeight: '700',
-                lineHeight: 32,
-                color: '#0f172a',
-                textAlign: 'center',
-                marginBottom: 8,
-                fontFamily: 'Hanken Grotesk',
-              }}
-            >
+            <Text className="headline-md text-on-surface font-black text-center mb-2">
               Check your email
             </Text>
-            <Text
-              style={{
-                fontSize: 16,
-                lineHeight: 24,
-                color: '#64748b',
-                textAlign: 'center',
-              }}
-            >
+            <Text className="body-md text-on-surface-variant text-center">
               We sent a verification code to
             </Text>
-            <Text
-              style={{
-                fontSize: 16,
-                lineHeight: 24,
-                color: '#0f172a',
-                textAlign: 'center',
-                fontWeight: '600',
-              }}
-            >
+            <Text className="body-md text-on-surface font-bold text-center">
               {email || 'your email'}
             </Text>
           </View>
 
           {error ? (
-            <View
-              style={{
-                backgroundColor: '#ffdad6',
-                borderRadius: 8,
-                padding: 16,
-                marginBottom: 24,
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 14,
-                  lineHeight: 20,
-                  color: '#ba1a1a',
-                }}
-              >
-                {error}
-              </Text>
+            <View className="bg-error-container rounded-lg p-4 mb-6">
+              <Text className="text-sm text-on-error-container">{error}</Text>
             </View>
           ) : null}
 
-          <View style={{ marginBottom: 32 }}>
-            <Text
-              style={{
-                fontSize: 12,
-                letterSpacing: 0.05,
-                fontWeight: '500',
-                color: '#191c1e',
-                marginBottom: 16,
-                textAlign: 'center',
-                fontFamily: 'JetBrains Mono',
-              }}
-            >
+          <View className="mb-8">
+            <Text className="label-sm text-on-surface text-center mb-4">
               VERIFICATION CODE
             </Text>
 
@@ -204,40 +113,25 @@ export default function VerifyEmailScreen() {
               onChangeText={(text) => {
                 const digits = text.replace(/[^0-9]/g, '').slice(0, 6);
                 setCode(digits);
-                if (digits.length === 6) {
-                  setError('');
-                }
+                if (digits.length === 6) setError('');
               }}
               editable={!loading}
               keyboardType="number-pad"
               maxLength={6}
-              style={{
-                position: 'absolute',
-                width: 1,
-                height: 1,
-                opacity: 0,
-              }}
+              caretHidden
+              className="absolute inset-0 opacity-0"
             />
 
-            <TouchableOpacity
-              activeOpacity={1}
-              onPress={() => inputRef.current?.focus()}
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                gap: 12,
-              }}
-            >
+            <View className="flex-row justify-center gap-3">
               {[0, 1, 2, 3, 4, 5].map((i) => {
                 const filled = code.length > i;
                 const isCurrent = code.length === i;
-
                 return (
                   <View
                     key={i}
                     style={{
-                      width: 52,
-                      height: 64,
+                      width: boxSize,
+                      height: boxSize + 12,
                       borderRadius: 8,
                       borderWidth: 2,
                       borderColor: filled ? '#006e2f' : '#6d7b6c',
@@ -247,106 +141,56 @@ export default function VerifyEmailScreen() {
                     }}
                   >
                     <Text
-                      style={{
-                        fontSize: 28,
-                        fontWeight: '700',
-                        color: filled ? '#006e2f' : '#191c1e',
-                        fontFamily: 'JetBrains Mono',
-                      }}
+                      className="text-2xl font-bold text-on-surface"
+                      style={{ fontFamily: 'JetBrains Mono', color: filled ? '#006e2f' : '#191c1e' }}
                     >
                       {filled ? code[i] : isCurrent ? '|' : ''}
                     </Text>
                   </View>
                 );
               })}
-            </TouchableOpacity>
+            </View>
           </View>
 
           <TouchableOpacity
             onPress={handleVerify}
             disabled={loading || code.length !== 6}
-            style={{
-              backgroundColor:
-                code.length === 6 ? '#006e2f' : '#bccbb9',
-              borderRadius: 8,
-              paddingVertical: 16,
-              marginBottom: 24,
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              shadowColor: '#0f172a',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.08,
-              shadowRadius: 20,
-              elevation: code.length === 6 ? 3 : 0,
-            }}
+            className={`rounded-lg py-4 mb-6 flex-row justify-center items-center ${
+              code.length === 6 ? 'bg-primary shadow-ambient' : 'bg-primary-100'
+            }`}
           >
             {loading ? (
               <ActivityIndicator color="#ffffff" size="small" />
             ) : (
-              <Text
-                style={{
-                  fontSize: 12,
-                  letterSpacing: 0.05,
-                  fontWeight: '700',
-                  color: code.length === 6 ? '#ffffff' : '#94a3b8',
-                  fontFamily: 'Hanken Grotesk',
-                }}
-              >
+              <Text className="label-sm font-bold text-white">
                 Verify Email
               </Text>
             )}
           </TouchableOpacity>
 
-          <View style={{ alignItems: 'center', marginBottom: 32 }}>
+          <View className="items-center mb-8">
             {canResend ? (
               <TouchableOpacity onPress={handleResend} disabled={resending}>
                 {resending ? (
                   <ActivityIndicator color="#006e2f" size="small" />
                 ) : (
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      fontWeight: '600',
-                      color: '#006e2f',
-                    }}
-                  >
+                  <Text className="body-md font-bold text-primary">
                     Resend verification code
                   </Text>
                 )}
               </TouchableOpacity>
             ) : (
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: '#64748b',
-                }}
-              >
+              <Text className="body-md text-on-surface-variant">
                 Resend code in{' '}
-                <Text
-                  style={{
-                    fontWeight: '700',
-                    color: '#0f172a',
-                    fontFamily: 'JetBrains Mono',
-                  }}
-                >
+                <Text className="font-bold text-on-surface" style={{ fontFamily: 'JetBrains Mono' }}>
                   {formatCountdown(countdown)}
                 </Text>
               </Text>
             )}
           </View>
 
-          <TouchableOpacity
-            onPress={() => router.push('/(auth)/sign-in')}
-            style={{ alignItems: 'center' }}
-          >
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: '600',
-                  color: '#64748b',
-                }}
-            >
+          <TouchableOpacity onPress={() => router.push('/(auth)/sign-in')} className="items-center">
+            <Text className="body-md font-semibold text-on-surface-variant">
               ← Back to Sign In
             </Text>
           </TouchableOpacity>

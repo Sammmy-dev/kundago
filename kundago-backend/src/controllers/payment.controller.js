@@ -1,6 +1,7 @@
 import { getStripe, isStripeConfigured } from '../config/stripe.js';
 import { logger } from '../config/index.js';
-import { Payment, Order, Parcel } from '../models/index.js';
+import { Payment, Order, Parcel, User } from '../models/index.js';
+import { sendOrderConfirmation } from '../utils/email.js';
 
 /**
  * Initiate Stripe payment for an Order
@@ -328,6 +329,13 @@ const handlePaymentSuccess = async (paymentIntent) => {
         order.updateOrderStatus('CONFIRMED');
         await order.save();
         logger.info(`Order ${relatedId} payment status updated to PAID and order status to CONFIRMED`);
+
+        // Send confirmation email
+        const orderUser = await User.findById(order.user);
+        if (orderUser && orderUser.email) {
+          sendOrderConfirmation(orderUser.email, orderUser.fullName, order._id, order.totalAmount, order.paymentMethod)
+            .catch((e) => logger.error('Failed to send order confirmation email', { error: e.message }));
+        }
       }
     }
     // Note: Parcel doesn't have paymentStatus field in the schema,
