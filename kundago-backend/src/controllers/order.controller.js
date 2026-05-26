@@ -304,11 +304,15 @@ export const getDashboardMetrics = async (req, res) => {
       orderStatus: 'DELIVERED'
     });
 
+    // Count total users
+    const totalUsers = await User.countDocuments();
+
     logger.info('Dashboard metrics fetched', {
       monthlyRevenue,
       dailyOrders,
       pendingOrders,
-      completedOrders
+      completedOrders,
+      totalUsers
     });
 
     res.status(200).json({
@@ -318,7 +322,8 @@ export const getDashboardMetrics = async (req, res) => {
           monthlyRevenue,
           dailyOrders,
           pendingOrders,
-          completedOrders
+          completedOrders,
+          totalUsers
         }
       }
     });
@@ -450,7 +455,7 @@ export const updateOrderStatus = async (req, res) => {
 
     // Send confirmation email when status changes to CONFIRMED
     if (orderStatus === 'CONFIRMED') {
-      User.findById(order.user)
+      User.findById(order.userId)
         .then((user) => {
           if (user && user.email) {
             return sendOrderConfirmation(user.email, user.fullName, order._id, order.totalAmount, order.paymentMethod);
