@@ -1,6 +1,6 @@
 import { getStripe, isStripeConfigured } from '../config/stripe.js';
 import { logger } from '../config/index.js';
-import { Payment, Order, Parcel, User } from '../models/index.js';
+import { Payment, Order, Parcel, User, Cart } from '../models/index.js';
 import { sendOrderConfirmation } from '../utils/email.js';
 
 /**
@@ -283,6 +283,12 @@ export const handleStripeWebhook = async (req, res) => {
         break;
       }
 
+      case 'payment_intent.canceled': {
+        const paymentIntent = event.data.object;
+        await handlePaymentFailure(paymentIntent);
+        break;
+      }
+
       default:
         logger.info(`Unhandled webhook event type: ${event.type}`);
     }
@@ -330,6 +336,14 @@ const handlePaymentSuccess = async (paymentIntent) => {
         await order.save();
         logger.info(`Order ${relatedId} payment status updated to PAID and order status to CONFIRMED`);
 
+        // Clear the user's cart
+        const cart = await Cart.findOne({ userId: order.userId });
+        if (cart) {
+          cart.clearCart();
+          await cart.save();
+          logger.info(`Cart cleared for user ${order.userId} after successful payment`);
+        }
+
         // Send confirmation email
         const orderUser = await User.findById(order.userId);
         if (orderUser && orderUser.email) {
@@ -347,7 +361,7 @@ const handlePaymentSuccess = async (paymentIntent) => {
 };
 
 /**
- * Handle failed payment
+ * Handle failed payment - delete the related order and restore stock
  * @param {Object} paymentIntent - Stripe payment intent object
  */
 const handlePaymentFailure = async (paymentIntent) => {
@@ -367,15 +381,21 @@ const handlePaymentFailure = async (paymentIntent) => {
 
     logger.info(`Payment ${payment._id} marked as FAILED`);
 
-    // Update related entity if it's an order
+    // Delete related order and restore stock
     const { relatedType, relatedId } = metadata;
 
     if (relatedType === 'ORDER') {
       const order = await Order.findById(relatedId);
       if (order) {
-        order.updatePaymentStatus('FAILED');
-        await order.save();
-        logger.info(`Order ${relatedId} payment status updated to FAILED`);
+        // Restore stock for each item
+        for (const item of order.items) {
+          await Product.findByIdAndUpdate(item.productId, {
+            $inc: { stock: item.quantity }
+          });
+        }
+        // Delete the order
+        await Order.findByIdAndDelete(relatedId);
+        logger.info(`Order ${relatedId} deleted due to failed payment, stock restored`);
       }
     }
 

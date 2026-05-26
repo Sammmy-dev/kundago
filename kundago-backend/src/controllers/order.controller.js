@@ -122,9 +122,11 @@ export const checkout = async (req, res) => {
       });
     }
 
-    // Step 6: Clear cart
-    cart.clearCart();
-    await cart.save();
+    // Step 6: Clear cart (only for non-Stripe payments; Stripe cart is cleared on successful payment)
+    if (paymentMethod !== 'STRIPE') {
+      cart.clearCart();
+      await cart.save();
+    }
 
     logger.info('Order created', {
       orderId: order._id,
@@ -137,13 +139,16 @@ export const checkout = async (req, res) => {
     await order.populate('items.productId', 'name images');
 
     // Send Order Placed Email (fire-and-forget, non-blocking)
-    User.findById(userId)
-      .then((user) => {
-        if (user && user.email) {
-          return sendOrderPlaced(user.email, user.fullName, order._id, totalAmount, paymentMethod);
-        }
-      })
-      .catch((e) => logger.error('Failed to send order placed email', { error: e.message }));
+    // Skip for Stripe - order confirmed email will be sent via webhook on successful payment
+    if (paymentMethod !== 'STRIPE') {
+      User.findById(userId)
+        .then((user) => {
+          if (user && user.email) {
+            return sendOrderPlaced(user.email, user.fullName, order._id, totalAmount, paymentMethod);
+          }
+        })
+        .catch((e) => logger.error('Failed to send order placed email', { error: e.message }));
+    }
 
     res.status(201).json({
       success: true,
