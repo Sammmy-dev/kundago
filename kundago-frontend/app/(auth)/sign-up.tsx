@@ -13,10 +13,12 @@ import { Link, useRouter } from 'expo-router';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/stores/auth';
+import { useThemeColors } from '@/constants/theme';
 
 export default function SignUpScreen() {
   const router = useRouter();
   const setAuth = useAuthStore((s) => s.setAuth);
+  const c = useThemeColors();
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -128,7 +130,7 @@ export default function SignUpScreen() {
                 paddingHorizontal: 16,
                 paddingVertical: 16,
                 fontSize: 16,
-                color: "#ffffff",
+                color: c.onSurface,
               }}
             />
           </View>
@@ -152,7 +154,7 @@ export default function SignUpScreen() {
                 paddingHorizontal: 16,
                 paddingVertical: 16,
                 fontSize: 16,
-                color: "#ffffff",
+                color: c.onSurface,
               }}
             />
           </View>
@@ -175,7 +177,7 @@ export default function SignUpScreen() {
                 paddingHorizontal: 16,
                 paddingVertical: 16,
                 fontSize: 16,
-                color: "#ffffff",
+                color: c.onSurface,
               }}
             />
           </View>
@@ -201,7 +203,7 @@ export default function SignUpScreen() {
                   paddingVertical: 16,
                   paddingRight: 48,
                   fontSize: 16,
-                  color: "#ffffff",
+                  color: c.onSurface,
                 }}
               />
               <TouchableOpacity
@@ -243,7 +245,7 @@ export default function SignUpScreen() {
                   paddingVertical: 16,
                   paddingRight: 48,
                   fontSize: 16,
-                  color: "#ffffff",
+                  color: c.onSurface,
                 }}
               />
               <TouchableOpacity

@@ -13,10 +13,12 @@ import { Link, useRouter } from 'expo-router';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/stores/auth';
+import { useThemeColors } from '@/constants/theme';
 
 export default function SignInScreen() {
   const router = useRouter();
   const setAuth = useAuthStore((s) => s.setAuth);
+  const c = useThemeColors();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -111,10 +113,10 @@ export default function SignInScreen() {
                 paddingHorizontal: 16,
                 paddingVertical: 16,
                 fontSize: 16,
-                color: '#ffffff',
+                color: c.onSurface,
               }}
             />
-          </View>
+            </View>
 
           <View className="mb-6">
             <Text className="label-sm text-on-surface mb-2">
@@ -138,7 +140,7 @@ export default function SignInScreen() {
                   paddingVertical: 16,
                   paddingRight: 48,
                   fontSize: 16,
-                  color: '#ffffff',
+                  color: c.onSurface,
                 }}
               />
               <TouchableOpacity
@@ -154,7 +156,7 @@ export default function SignInScreen() {
             </View>
           </View>
 
-          <TouchableOpacity className="mb-10">
+          <TouchableOpacity onPress={() => router.push('/(auth)/forgot-password')} className="mb-10">
             <Text className="label-sm text-primary text-right">
               Forgot password?
             </Text>

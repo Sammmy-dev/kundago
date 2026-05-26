@@ -1,5 +1,6 @@
 import '@/global.css';
 import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 
 export default function EntryScreen() {
@@ -17,54 +18,33 @@ export default function EntryScreen() {
         <View className="items-center pt-2.5">
           <Image
             source={require('@/assets/images/kungaGo_logo.png')}
-            className="w-40 h-40 mb-1"
+            className="w-40 h-40 "
             style={{ resizeMode: 'cover' }}
           />
           <Text
-            className='text-primary text-6xl font-extrabold mt-0'
+            className='text-primary text-6xl mb-0  font-extrabold mt-0'
           >
             <Text>Kunda</Text>
             <Text style={{ color: '#ef4444' }}>Go</Text>
           </Text>
           <Text
-            className="text-lg font-bold text-center mt-4 text-secondary-900"
+             className="text-lg font-bold text-center relative -top-3 mt-1 mb-4 text-white"
           >
-            Shop Smart.{'\n'}Deliver <Text className='text-primary'>Fast</Text>.
+            Shop Smart. Deliver <Text className='text-primary'>Fast</Text>.
           </Text>
         </View>
 
         {/* Middle Section - Illustration */}
-        <View className="h-45">
+        <View className="h-45 mb-6">
           <Image
             source={require('@/assets/images/KundaGo banner.png')}
             className="w-full h-full"
-            style={{ resizeMode: 'cover' }}
+            style={{ resizeMode: 'cover', borderRadius: 12 }}
           />
         </View>
 
         {/* Bottom Section - Actions */}
         <View className="gap-4 pb-4">
-          {/* Explore KundaGo Button */}
-          <Link href="/(tabs)" asChild>
-            <TouchableOpacity
-              className="bg-primary rounded-lg py-4 items-center"
-              style={{
-                shadowColor: '#0f172a',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.08,
-                shadowRadius: 20,
-                elevation: 3,
-              }}
-            >
-              <Text
-                className="text-xs font-bold text-white bg-primary"
-                style={{ letterSpacing: 0.05 }}
-              >
-                Explore KundaGo
-              </Text>
-            </TouchableOpacity>
-          </Link>
-
           {/* Login / Sign Up Button */}
           <Link href="/(auth)/sign-in" asChild>
             <TouchableOpacity
@@ -97,7 +77,7 @@ export default function EntryScreen() {
               >
                 Continue as Guest
               </Text>
-              <Text className="text-primary text-xl">→</Text>
+              <Ionicons name="arrow-forward" size={20} color="#006e2f" />
             </View>
           </TouchableOpacity>
         </View>

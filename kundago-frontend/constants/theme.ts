@@ -93,7 +93,7 @@ export const DarkColors = {
     containerHigh: '#282a2c',
     containerHighest: '#333537',
   },
-  onSurface: '#e1e3e5',
+  onSurface: '#ffffff',
   onSurfaceVariant: '#bcc9bc',
   error: {
     DEFAULT: '#ffb4ab',

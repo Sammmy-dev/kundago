@@ -1,5 +1,5 @@
 import '@/global.css';
-import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, ActivityIndicator, Alert, Modal, Linking } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, ActivityIndicator, Alert, Modal, Linking, KeyboardAvoidingView, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -382,65 +382,77 @@ export default function CheckoutScreen() {
 
       {/* Add Address Modal */}
       <Modal visible={showAddressForm} animationType="slide" transparent>
-        <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-surface-container rounded-t-xl p-6">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="headline-md text-on-surface font-black">
-                New Address
-              </Text>
-              <TouchableOpacity onPress={() => setShowAddressForm(false)}>
-                <Feather name="x" size={24} color={c.onSurface} />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          className="flex-1"
+        >
+          <View className="flex-1 bg-black/50 justify-end">
+            <View className="bg-surface-container rounded-t-xl" style={{ maxHeight: '90%' }}>
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                className="p-6"
+              >
+              <View className="flex-row justify-between items-center mb-4">
+                <Text className="headline-md text-on-surface font-black">
+                  New Address
+                </Text>
+                <TouchableOpacity onPress={() => setShowAddressForm(false)}>
+                  <Feather name="x" size={24} color={c.onSurface} />
+                </TouchableOpacity>
+              </View>
+
+              <TextInput
+                className="bg-surface rounded-lg px-4 py-3 mb-3 text-on-surface"
+                placeholder="Full name"
+                placeholderTextColor={c.onSurfaceVariant}
+                value={addressForm.fullName}
+                onChangeText={(t) =>
+                  setAddressForm((p) => ({ ...p, fullName: t }))
+                }
+              />
+              <TextInput
+                className="bg-surface rounded-lg px-4 py-3 mb-3 text-on-surface"
+                placeholder="Phone number"
+                placeholderTextColor={c.onSurfaceVariant}
+                keyboardType="phone-pad"
+                value={addressForm.phone}
+                onChangeText={(t) =>
+                  setAddressForm((p) => ({ ...p, phone: t }))
+                }
+              />
+              <TextInput
+                className="bg-surface rounded-lg px-4 py-3 mb-3 text-on-surface"
+                placeholder="Delivery address"
+                placeholderTextColor={c.onSurfaceVariant}
+                multiline
+                value={addressForm.address}
+                onChangeText={(t) =>
+                  setAddressForm((p) => ({ ...p, address: t }))
+                }
+              />
+              <TextInput
+                className="bg-surface rounded-lg px-4 py-3 mb-4 text-on-surface"
+                placeholder="Landmark (optional)"
+                placeholderTextColor={c.onSurfaceVariant}
+                value={addressForm.landmark}
+                onChangeText={(t) =>
+                  setAddressForm((p) => ({ ...p, landmark: t }))
+                }
+              />
+
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={saveAddress}
+                className="bg-primary rounded-lg py-4 items-center"
+              >
+                <Text className="label-sm font-bold text-white">
+                  Save Address
+                </Text>
               </TouchableOpacity>
+              </ScrollView>
             </View>
-
-            <TextInput
-              className="bg-surface rounded-lg px-4 py-3 mb-3 text-on-surface"
-              placeholder="Full name"
-              placeholderTextColor={c.onSurfaceVariant}
-              value={addressForm.fullName}
-              onChangeText={(t) =>
-                setAddressForm((p) => ({ ...p, fullName: t }))
-              }
-            />
-            <TextInput
-              className="bg-surface rounded-lg px-4 py-3 mb-3 text-on-surface"
-              placeholder="Phone number"
-              placeholderTextColor={c.onSurfaceVariant}
-              keyboardType="phone-pad"
-              value={addressForm.phone}
-              onChangeText={(t) => setAddressForm((p) => ({ ...p, phone: t }))}
-            />
-            <TextInput
-              className="bg-surface rounded-lg px-4 py-3 mb-3 text-on-surface"
-              placeholder="Delivery address"
-              placeholderTextColor={c.onSurfaceVariant}
-              multiline
-              value={addressForm.address}
-              onChangeText={(t) =>
-                setAddressForm((p) => ({ ...p, address: t }))
-              }
-            />
-            <TextInput
-              className="bg-surface rounded-lg px-4 py-3 mb-4 text-on-surface"
-              placeholder="Landmark (optional)"
-              placeholderTextColor={c.onSurfaceVariant}
-              value={addressForm.landmark}
-              onChangeText={(t) =>
-                setAddressForm((p) => ({ ...p, landmark: t }))
-              }
-            />
-
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={saveAddress}
-              className="bg-primary rounded-lg py-4 items-center"
-            >
-              <Text className="label-sm font-bold text-white">
-                Save Address
-              </Text>
-            </TouchableOpacity>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
