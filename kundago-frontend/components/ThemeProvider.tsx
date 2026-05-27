@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import { useColorScheme as useDeviceColorScheme } from 'react-native';
 import { useThemeStore } from '@/lib/stores/theme';
 
@@ -13,17 +13,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     hydrate();
   }, []);
 
-  useEffect(() => {
-    const resolved =
-      mode === 'system'
-        ? deviceScheme === 'dark'
-        : mode === 'dark';
-    setIsDark(resolved);
-  }, [mode, deviceScheme]);
+  const isDark =
+    mode === 'system'
+      ? deviceScheme === 'dark'
+      : mode === 'dark';
 
-  const isDark = mode === 'system'
-    ? deviceScheme === 'dark'
-    : mode === 'dark';
+  useLayoutEffect(() => {
+    setIsDark(isDark);
+  }, [isDark, setIsDark]);
 
   return (
     <View className={`flex-1 will-change-variable ${isDark ? 'dark' : ''}`} style={{ flex: 1 }}>

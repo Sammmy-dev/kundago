@@ -84,7 +84,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={{ paddingTop: insets.top }} className="bg-surface flex-1">
+    <View style={{ paddingTop: insets.top }} className="flex-1 bg-surface">
       <View className="px-4 pt-4 pb-3 bg-surface">
         <View className="flex-row justify-between items-center mb-4">
           <View className="flex-row items-center gap-2">
@@ -93,27 +93,21 @@ export default function HomeScreen() {
               className="w-9 h-9"
               resizeMode="contain"
             />
-            <Text className="headline-md text-primary">
+            <Text className="text-headline-md text-primary">
               <Text>Kunda</Text>
               <Text style={{ color: "#ef4444" }}>Go</Text>
             </Text>
           </View>
-          {/* <TouchableOpacity className="relative">
-            <Feather name="bell" size={24} color="#191c1e" />
-            <View className="absolute -top-1 -right-1 w-4 h-4 bg-error rounded-full items-center justify-center">
-              <Text className="text-white text-xs font-bold">3</Text>
-            </View>
-          </TouchableOpacity> */}
         </View>
 
         <View className="mb-4 px-2">
-          <Text className="body-md font-semibold text-on-surface">
-            Welcome <Text className="body-md font-semibold">{firstName}</Text>
+          <Text className="text-body-md font-semibold text-on-surface">
+            Welcome <Text className="text-body-md font-semibold">{firstName}</Text>
           </Text>
         </View>
 
         <View className="relative">
-          <View className="flex-row items-center bg-surface-container rounded-lg px-4 py-3 gap-3">
+          <View className="flex-row items-center rounded-lg px-4 py-3 gap-3 bg-surface-container">
             <Feather name="search" size={20} color={c.onSurfaceVariant} />
             <TextInput
               className="flex-1 text-sm text-on-surface"
@@ -131,7 +125,7 @@ export default function HomeScreen() {
             )}
           </View>
           {showSuggestions && suggestions.length > 0 && (
-            <View className="absolute top-full left-0 right-0 bg-surface-container rounded-b-lg shadow-ambient z-50">
+            <View className="absolute top-full left-0 right-0 rounded-b-lg z-50 shadow-ambient bg-surface-container">
               {suggestions.map((item, i) => (
                 <TouchableOpacity
                   key={item._id}
@@ -140,29 +134,30 @@ export default function HomeScreen() {
                     setShowSuggestions(false);
                     router.push(`/product/${item._id}`);
                   }}
-                  className={`flex-row items-center gap-3 px-4 py-3 ${i < suggestions.length - 1 ? 'border-b border-surface-variant' : ''}`}
+                  className="flex-row items-center gap-3 px-4 py-3"
+                  style={i < suggestions.length - 1 ? { borderBottomWidth: 1, borderColor: c.surfaceVariant } : undefined}
                 >
                   <Feather name="search" size={16} color={c.onSurfaceVariant} />
                   <View className="flex-1">
-                    <Text className="body-md text-on-surface" numberOfLines={1}>{item.name}</Text>
+                    <Text className="text-body-md text-on-surface" numberOfLines={1}>{item.name}</Text>
                   </View>
-                  <Text className="body-sm text-primary font-semibold">D{item.price.toLocaleString()}</Text>
+                  <Text className="text-label-sm font-semibold text-primary">D{item.price.toLocaleString()}</Text>
                 </TouchableOpacity>
               ))}
               <TouchableOpacity
                 activeOpacity={0.7}
                 onPress={handleSearchSubmit}
-                className="flex-row items-center justify-center gap-2 px-4 py-3 bg-primary-50 rounded-b-lg"
+                className="flex-row items-center justify-center gap-2 px-4 py-3 rounded-b-lg bg-primary-50"
               >
                 <Feather name="search" size={14} color={c.primary.DEFAULT} />
-                <Text className="label-sm text-primary font-bold">View all results</Text>
+                <Text className="text-label-sm font-bold text-primary">View all results</Text>
               </TouchableOpacity>
             </View>
           )}
         </View>
       </View>
 
-    <ScrollView className="bg-surface flex-1">
+    <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ paddingBottom: 24 }}>
 
       <View className="mx-4 mt-5 mb-2">
         <FlatList
@@ -195,11 +190,11 @@ export default function HomeScreen() {
           {banners.map((_, index) => (
             <View
               key={index}
-              className={`${
-                currentBanner === index
-                  ? "w-6 bg-primary"
-                  : "w-2 bg-on-surface-variant"
-              } h-2 rounded-full transition-all`}
+              className="h-2 rounded-full transition-all"
+              style={{
+                width: currentBanner === index ? 24 : 8,
+                backgroundColor: currentBanner === index ? c.primary.DEFAULT : c.onSurfaceVariant,
+              }}
             />
           ))}
         </View>
@@ -207,14 +202,11 @@ export default function HomeScreen() {
 
       <View className="px-4 mt-6 mb-6">
         <View className="flex-row justify-between items-center mb-4">
-          <Text className="headline-md text-on-surface font-black">
+          <Text className="text-headline-md text-on-surface">
             Categories
           </Text>
           <TouchableOpacity onPress={() => router.push('/categories')} className="flex-row items-center gap-1">
-            <Text
-              className="text-sm font-bold text-primary"
-              style={{ fontFamily: "Hanken Grotesk" }}
-            >
+            <Text className="text-sm font-bold text-primary">
               View all
             </Text>
             <Feather name="arrow-right" size={12} color={c.primary.DEFAULT} />
@@ -227,12 +219,11 @@ export default function HomeScreen() {
               key={category.id}
               activeOpacity={0.7}
               onPress={() => router.push(`/categories?category=${encodeURIComponent(category.name)}`)}
-              className="w-[48%] bg-surface-container rounded-lg p-4 items-center shadow-ambient flex-row gap-3"
+              className="w-[48%] rounded-lg p-4 items-center flex-row gap-3 bg-surface-container"
             >
               <Image source={category.image} className="w-10 h-10" resizeMode="contain" />
               <Text
-                className="label-sm text-on-surface text-center font-bold flex-1"
-                style={{ lineHeight: 14 }}
+                className="text-center font-bold flex-1 text-label-sm text-on-surface"
               >
                 {category.name}
               </Text>
@@ -243,7 +234,7 @@ export default function HomeScreen() {
 
       <View className="px-4 mb-6">
         <View className="flex-row justify-between items-center mb-4">
-          <Text className="headline-md text-on-surface font-black">
+          <Text className="text-headline-md text-on-surface">
             Popular
           </Text>
           <TouchableOpacity className="flex-row items-center gap-1">
@@ -253,35 +244,31 @@ export default function HomeScreen() {
         </View>
 
         <FlatList
-          className="bg-surface p-2"
+          className="p-2 bg-surface"
           data={popularItems}
           renderItem={({ item }) => (
             <TouchableOpacity
               activeOpacity={0.8}
-              className="bg-surface-container rounded-lg p-3 mr-3  shadow-ambient"
-              style={{
-                width: 150,
-              }}
+              className="rounded-lg p-3 mr-3 bg-surface-container"
+              style={{ width: 150 }}
             >
               <View
-                className="rounded-lg p-4 bg-secondary-100 items-center mb-3 justify-center"
-                style={{
-                  minHeight: 100,
-                }}
+                className="rounded-lg p-4 items-center mb-3 justify-center bg-secondary-100"
+                style={{ minHeight: 100 }}
               >
                 <Feather name={item.icon as any} size={32} color={c.primary.DEFAULT} />
               </View>
               <Text
-                className="label-sm text-on-surface font-bold mb-1 text-left"
+                className="font-bold mb-1 text-left text-label-sm text-on-surface"
                 numberOfLines={2}
               >
                 {item.name}
               </Text>
               <View className="flex-row justify-between items-center">
-                <Text className="body-md text-primary font-black">
+                <Text className="text-body-md font-black text-primary">
                   {item.price}
                 </Text>
-                <TouchableOpacity className="w-7 h-7 bg-primary-500 rounded-lg items-center justify-center">
+                <TouchableOpacity className="w-7 h-7 rounded-lg items-center justify-center bg-primary-500">
                   <Feather name="plus" size={14} color="#ffffff" />
                 </TouchableOpacity>
               </View>

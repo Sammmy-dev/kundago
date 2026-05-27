@@ -2,7 +2,6 @@ import '@/global.css';
 import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
-
 export default function EntryScreen() {
   const router = useRouter();
 
@@ -21,16 +20,12 @@ export default function EntryScreen() {
             className="w-40 h-40 "
             style={{ resizeMode: 'cover' }}
           />
-          <Text
-            className='text-primary text-6xl mb-0  font-extrabold mt-0'
-          >
+          <Text className='text-6xl mb-0 font-extrabold mt-0 text-primary'>
             <Text>Kunda</Text>
             <Text style={{ color: '#ef4444' }}>Go</Text>
           </Text>
-          <Text
-             className="text-lg font-bold text-center relative -top-3 mt-1 mb-4 text-white"
-          >
-            Shop Smart. Deliver <Text className='text-primary'>Fast</Text>.
+          <Text className="text-body-lg font-bold text-center -mt-3 mb-4 text-on-surface">
+            Shop Smart. Deliver <Text className="text-primary">Fast</Text>.
           </Text>
         </View>
 
@@ -48,19 +43,9 @@ export default function EntryScreen() {
           {/* Login / Sign Up Button */}
           <Link href="/(auth)/sign-in" asChild>
             <TouchableOpacity
-              className="bg-white border border-secondary-200 rounded-lg py-4 items-center"
-              style={{
-                shadowColor: '#0f172a',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.08,
-                shadowRadius: 20,
-                elevation: 2,
-              }}
+              className="rounded-lg py-4 items-center bg-surface-container border border-surface-variant shadow-ambient"
             >
-              <Text
-                className="text-xs font-bold text-primary"
-                style={{ letterSpacing: 0.05 }}
-              >
+              <Text className="text-label-sm text-primary">
                 Login / Sign Up
               </Text>
             </TouchableOpacity>
@@ -72,9 +57,7 @@ export default function EntryScreen() {
             className="items-center py-3"
           >
             <View className="flex-row items-center gap-1">
-              <Text
-                className="text-base font-semibold text-primary"
-              >
+              <Text className="text-body-md font-semibold text-primary">
                 Continue as Guest
               </Text>
               <Ionicons name="arrow-forward" size={20} color="#006e2f" />

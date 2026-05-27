@@ -80,18 +80,18 @@ export default function ProfileScreen() {
     .slice(0, 2) || '?';
 
   return (
-    <View style={{ paddingTop: insets.top }} className="bg-surface flex-1">
+    <View style={{ paddingTop: insets.top }} className="flex-1 bg-surface">
       <ScreenHeader title="Profile" />
 
-    <ScrollView className="bg-surface flex-1">
+    <ScrollView className="flex-1 bg-surface">
 
       <View className="px-4 mt-2 mb-6">
-        <View className="bg-surface-container rounded-lg p-6 items-center shadow-ambient">
+        <View className="rounded-lg p-6 items-center bg-surface-container">
           <View className="relative mb-4">
             {avatar ? (
               <Image source={{ uri: avatar }} className="w-20 h-20 rounded-full" />
             ) : (
-              <View className="w-20 h-20 bg-primary-50 rounded-full items-center justify-center">
+              <View className="w-20 h-20 rounded-full items-center justify-center bg-primary-50">
                 <Feather name="user" size={32} color={c.primary.DEFAULT} />
               </View>
             )}
@@ -99,23 +99,23 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
               onPress={pickImage}
               disabled={uploading}
-              className="absolute -bottom-1 -right-1 w-7 h-7 bg-primary rounded-full items-center justify-center"
+              className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full items-center justify-center bg-primary"
             >
               <Feather name={uploading ? 'loader' : 'camera'} size={14} color="#ffffff" />
             </TouchableOpacity>
           </View>
-          <Text className="headline-md text-on-surface font-black mb-1">{user?.fullName || 'User'}</Text>
+          <Text className="text-headline-md text-on-surface mb-1">{user?.fullName || 'User'}</Text>
           {user?.email && (
-            <Text className="body-md text-on-surface-variant">{user.email || 'No email provided'}</Text>
+            <Text className="text-body-md text-on-surface-variant">{user.email || 'No email provided'}</Text>
           )}
           {user?.phone && (
-            <Text className="body-md text-on-surface-variant">{user.phone || 'No phone provided'}</Text>
+            <Text className="text-body-md text-on-surface-variant">{user.phone || 'No phone provided'}</Text>
           )}
         </View>
       </View>
 
       <View className="px-4 mb-6">
-        <View className="bg-surface-container rounded-lg shadow-ambient">
+        <View className="rounded-lg bg-surface-container">
           {menuItems.map((item) => (
             <TouchableOpacity
               key={item.id}
@@ -128,10 +128,10 @@ export default function ProfileScreen() {
               }}
               className="flex-row items-center px-4 py-4"
             >
-              <View className="w-10 h-10 bg-primary-50 rounded-lg items-center justify-center mr-3">
+              <View className="w-10 h-10 rounded-lg items-center justify-center mr-3 bg-primary-50">
                 <Feather name={item.icon as any} size={20} color={c.primary.DEFAULT} />
               </View>
-              <Text className="body-md text-on-surface font-semibold flex-1">{item.label}</Text>
+              <Text className="text-body-md font-semibold text-on-surface flex-1">{item.label}</Text>
               <Feather name="chevron-right" size={20} color={c.onSurfaceVariant} />
             </TouchableOpacity>
           ))}
@@ -145,10 +145,10 @@ export default function ProfileScreen() {
             logout();
             router.replace('/(auth)/sign-in');
           }}
-          className="bg-red-50 rounded-lg flex-row items-center justify-center px-4 py-4"
+          className="rounded-lg flex-row items-center justify-center px-4 py-4 bg-red-50"
         >
           <Feather name="log-out" size={20} color={c.error.DEFAULT} />
-          <Text className="body-md font-bold ml-2 text-error">
+          <Text className="text-body-md font-bold ml-2 text-error">
             Logout
           </Text>
         </TouchableOpacity>
