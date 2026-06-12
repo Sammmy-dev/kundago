@@ -8,13 +8,16 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { api } from '@/lib/api';
 import { useThemeColors } from '@/constants/theme';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const c = useThemeColors();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,6 +28,11 @@ export default function ForgotPasswordScreen() {
     setError('');
     if (!email.trim()) {
       setError('Email is required');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
       return;
     }
 
@@ -47,36 +55,39 @@ export default function ForgotPasswordScreen() {
       extraScrollHeight={100}
       className="bg-surface"
     >
-      <View className="flex-1 px-6 py-10 justify-center">
-        <View className="mb-10 mt-10 items-center">
-          <View className="items-center gap-2">
-            <Image
-              source={require('@/assets/images/kungaGo_logo.png')}
-              className="w-32 h-32 relative right-1"
-              resizeMode="cover"
-            />
-            <Text className="headline-md text-primary text-3xl">
-              <Text>Kunda</Text>
-              <Text style={{ color: '#ef4444' }}>Go</Text>
-            </Text>
+      <View style={{ paddingTop: insets.top }} className="flex-1 px-6 py-8 justify-center">
+        {/* Back Button */}
+        <TouchableOpacity
+          onPress={() => router.push('/(auth)/sign-in')}
+          className="flex-row items-center gap-1 mb-8"
+        >
+          <Feather name="arrow-left" size={20} color={c.primary.DEFAULT} />
+          <Text className="label-sm font-semibold text-on-surface">Back</Text>
+        </TouchableOpacity>
+
+        {/* Header Section */}
+        <View className="items-center mb-10">
+          <View className="w-20 h-20 bg-primary-50 rounded-full items-center justify-center mb-4">
+            <Feather name="mail" size={32} color={c.primary.DEFAULT} />
           </View>
+          <Text className="text-2xl font-black text-on-surface text-center mb-2">
+            Forgot Password?
+          </Text>
+          <Text className="body-md text-on-surface-variant text-center">
+            Enter your email and we'll send you a code to reset your password.
+          </Text>
         </View>
 
-        <Text className="headline-md text-on-surface font-black text-center mb-2">
-          Forgot Password
-        </Text>
-        <Text className="body-md text-on-surface-variant text-center mb-8">
-          Enter your email and we'll send you a reset code.
-        </Text>
-
+        {/* Error Message */}
         {error ? (
-          <View className="bg-error-container rounded px-4 py-4 mb-4">
-            <Text className="body-md text-error">{error}</Text>
+          <View className="bg-error-container rounded-lg px-4 py-3 mb-6">
+            <Text className="label-sm text-error font-semibold">{error}</Text>
           </View>
         ) : null}
 
+        {/* Email Input */}
         <View className="mb-8">
-          <Text className="label-sm text-on-surface mb-2">Email Address</Text>
+          <Text className="label-sm font-semibold text-on-surface mb-2">Email Address</Text>
           <TextInput
             placeholder="you@example.com"
             placeholderTextColor={c.onSurfaceVariant}
@@ -87,34 +98,35 @@ export default function ForgotPasswordScreen() {
             autoCapitalize="none"
             onFocus={() => setFocusedField('email')}
             onBlur={() => setFocusedField(null)}
+            className="rounded-lg px-4 py-4 text-base text-on-surface"
             style={{
-              borderWidth: 1,
+              borderWidth: 2,
               borderColor: focusedField === 'email' ? c.primary.DEFAULT : c.outline,
-              borderRadius: 4,
-              paddingHorizontal: 16,
-              paddingVertical: 16,
-              fontSize: 16,
-              color: c.onSurface,
+              backgroundColor: c.surfaceContainer,
             }}
           />
         </View>
 
+        {/* Submit Button */}
         <TouchableOpacity
           onPress={handleSubmit}
           disabled={loading}
-          className="bg-primary rounded py-4 mb-6 flex-row justify-center items-center"
+          className="bg-primary rounded-lg py-4 mb-6 flex-row justify-center items-center"
+          style={{ opacity: loading ? 0.7 : 1 }}
         >
           {loading ? (
             <ActivityIndicator color="#ffffff" size="small" />
           ) : (
-            <Text className="label-sm text-white font-bold">Send Reset Code</Text>
+            <Text className="label-sm font-bold text-white">Send Reset Code</Text>
           )}
         </TouchableOpacity>
 
+        {/* Sign In Link */}
         <TouchableOpacity onPress={() => router.push('/(auth)/sign-in')} className="items-center">
-          <Text className="body-md font-semibold text-on-surface-variant">
-            ← Back to Sign In
-          </Text>
+          <View className="flex-row items-center gap-2">
+            <Text className="body-sm text-on-surface-variant">Don't have the code? </Text>
+            <Text className="body-sm font-bold text-primary">Sign in instead</Text>
+          </View>
         </TouchableOpacity>
       </View>
     </KeyboardAwareScrollView>

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
+import { Appearance } from 'react-native';
 
 type ThemeMode = 'system' | 'light' | 'dark';
 
@@ -14,13 +15,28 @@ interface ThemeState {
 
 const THEME_KEY = 'theme-mode';
 
+const getDeviceIsDark = (): boolean => {
+  try {
+    return Appearance.getColorScheme() === 'dark';
+  } catch {
+    return false;
+  }
+};
+
 export const useThemeStore = create<ThemeState>((set) => ({
   mode: 'system',
-  isDark: false,
+  isDark: getDeviceIsDark(),
   loaded: false,
 
   setMode: (mode) => {
-    set({ mode });
+    if (mode === 'light') {
+      set({ mode, isDark: false });
+    } else if (mode === 'dark') {
+      set({ mode, isDark: true });
+    } else {
+      const deviceDark = getDeviceIsDark();
+      set({ mode, isDark: deviceDark });
+    }
     SecureStore.setItemAsync(THEME_KEY, mode);
   },
 
@@ -31,8 +47,10 @@ export const useThemeStore = create<ThemeState>((set) => ({
   hydrate: async () => {
     try {
       const stored = await SecureStore.getItemAsync(THEME_KEY);
-      if (stored === 'light' || stored === 'dark') {
-        set({ mode: stored, loaded: true });
+      if (stored === 'light') {
+        set({ mode: stored, isDark: false, loaded: true });
+      } else if (stored === 'dark') {
+        set({ mode: stored, isDark: true, loaded: true });
       } else {
         set({ loaded: true });
       }

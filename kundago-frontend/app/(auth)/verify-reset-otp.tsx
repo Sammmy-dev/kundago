@@ -8,30 +8,30 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
-  useWindowDimensions,
+  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Feather } from '@expo/vector-icons';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { api } from '@/lib/api';
+import { useThemeColors } from '@/constants/theme';
 
 export default function VerifyResetOTPScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const c = useThemeColors();
   const { email } = useLocalSearchParams<{ email: string }>();
-  const { width } = useWindowDimensions();
-  const [code, setCode] = useState('');
+  const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [error, setError] = useState('');
   const [countdown, setCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
-  const inputRef = useRef<TextInput>(null);
-
-  const boxSize = Math.min(52, (width - 48 - 60) / 6);
+  const inputRefs = useRef<(TextInput | null)[]>([null, null, null, null, null, null]);
 
   useEffect(() => {
-    inputRef.current?.focus();
+    inputRefs.current[0]?.focus();
   }, []);
 
   useEffect(() => {
@@ -43,6 +43,30 @@ export default function VerifyResetOTPScreen() {
       setCanResend(true);
     }
   }, [countdown, canResend]);
+
+  const handleOtpChange = (index: number, value: string) => {
+    const sanitized = value.replace(/[^0-9]/g, '');
+    const newDigits = [...otpDigits];
+    newDigits[index] = sanitized.slice(-1);
+    setOtpDigits(newDigits);
+    setError('');
+
+    if (sanitized && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyPress = (index: number, key: string) => {
+    if (key === 'Backspace' && !otpDigits[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpBoxPress = (index: number) => {
+    inputRefs.current[index]?.focus();
+  };
+
+  const code = otpDigits.join('');
 
   const handleVerify = async () => {
     if (code.length !== 6) {
@@ -69,8 +93,8 @@ export default function VerifyResetOTPScreen() {
       await api.post('/auth/forgot-password', { email });
       setCountdown(60);
       setCanResend(false);
-      setCode('');
-      inputRef.current?.focus();
+      setOtpDigits(['', '', '', '', '', '']);
+      inputRefs.current[0]?.focus();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to resend code. Please try again.');
     } finally {
@@ -85,175 +109,144 @@ export default function VerifyResetOTPScreen() {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} style={{ backgroundColor: '#fffbfe' }}>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            paddingTop: insets.top,
-            paddingHorizontal: 24,
-            paddingVertical: 40,
-          }}
+    <KeyboardAwareScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      keyboardShouldPersistTaps="handled"
+      enableOnAndroid
+      extraScrollHeight={100}
+      className="bg-surface"
+    >
+      <View style={{ paddingTop: insets.top }} className="flex-1 px-6 py-8 justify-center">
+        {/* Back Button */}
+        <TouchableOpacity
+          onPress={() => router.push('/(auth)/forgot-password')}
+          className="flex-row items-center gap-1 mb-8"
         >
-          {/* Back Button */}
-          <TouchableOpacity
-            onPress={() => router.push('/(auth)/forgot-password')}
-            style={{ marginBottom: 24 }}
-          >
-            <Text style={{ fontSize: 14, fontWeight: '600', color: '#49454e' }}>
-              ← Back
-            </Text>
-          </TouchableOpacity>
+          <Feather name="arrow-left" size={20} color={c.primary.DEFAULT} />
+          <Text className="label-sm font-semibold text-on-surface">Back</Text>
+        </TouchableOpacity>
 
-          {/* Header Section */}
-          <View style={{ alignItems: 'center', marginBottom: 40 }}>
-            <View
-              style={{
-                width: 80,
-                height: 80,
-                backgroundColor: '#f3e5ff',
-                borderRadius: 40,
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginBottom: 24,
-              }}
-            >
-              <Text style={{ fontSize: 36 }}>🔐</Text>
-            </View>
-            <Text style={{ fontSize: 28, fontWeight: '900', color: '#1c1b1f', marginBottom: 8, textAlign: 'center' }}>
-              Check your email
-            </Text>
-            <Text style={{ fontSize: 14, color: '#49454e', textAlign: 'center', marginBottom: 4 }}>
-              We sent a reset code to
-            </Text>
-            <Text style={{ fontSize: 14, fontWeight: '700', color: '#1c1b1f', textAlign: 'center' }}>
-              {email || 'your email'}
-            </Text>
+        {/* Header Section */}
+        <View className="items-center mb-10">
+          <View className="w-20 h-20 bg-primary-50 rounded-full items-center justify-center mb-4">
+            <Feather name="shield" size={32} color={c.primary.DEFAULT} />
           </View>
+          <Text className="text-2xl font-black text-on-surface text-center mb-2">
+            Check your email
+          </Text>
+          <Text className="body-md text-on-surface-variant text-center mb-1">
+            We sent a reset code to
+          </Text>
+          <Text className="body-md font-semibold text-on-surface text-center">
+            {email || 'your email'}
+          </Text>
+        </View>
 
-          {/* Error Message */}
-          {error ? (
-            <View style={{ backgroundColor: '#f9dedc', borderRadius: 8, padding: 16, marginBottom: 24 }}>
-              <Text style={{ fontSize: 12, color: '#b3261e' }}>{error}</Text>
-            </View>
-          ) : null}
-
-          {/* OTP Input Section */}
-          <View style={{ marginBottom: 32 }}>
-            <Text style={{ fontSize: 11, fontWeight: '500', color: '#1c1b1f', textAlign: 'center', marginBottom: 16, letterSpacing: 0.5 }}>
-              RESET CODE
-            </Text>
-
-            <TextInput
-              ref={inputRef}
-              value={code}
-              onChangeText={(text) => {
-                const digits = text.replace(/[^0-9]/g, '').slice(0, 6);
-                setCode(digits);
-                if (digits.length === 6) setError('');
-              }}
-              editable={!loading}
-              keyboardType="number-pad"
-              maxLength={6}
-              caretHidden
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                opacity: 0,
-              }}
-            />
-
-            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 12 }}>
-              {[0, 1, 2, 3, 4, 5].map((i) => {
-                const filled = code.length > i;
-                const isCurrent = code.length === i;
-                return (
-                  <View
-                    key={i}
-                    style={{
-                      width: boxSize,
-                      height: boxSize + 12,
-                      borderRadius: 8,
-                      borderWidth: 2,
-                      borderColor: filled ? '#006e2f' : '#6d7b6c',
-                      backgroundColor: filled ? '#f0fdf4' : '#ffffff',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 28,
-                        fontWeight: '700',
-                        fontFamily: 'JetBrains Mono',
-                        color: filled ? '#006e2f' : '#191c1e',
-                      }}
-                    >
-                      {filled ? code[i] : isCurrent ? '|' : ''}
-                    </Text>
-                  </View>
-                );
-              })}
-            </View>
+        {/* Error Message */}
+        {error ? (
+          <View className="bg-error-container rounded-lg px-4 py-3 mb-6">
+            <Text className="label-sm text-error font-semibold">{error}</Text>
           </View>
+        ) : null}
 
-          {/* Verify Button */}
-          <TouchableOpacity
-            onPress={handleVerify}
-            disabled={loading || code.length !== 6}
-            style={{
-              borderRadius: 8,
-              paddingVertical: 16,
-              marginBottom: 24,
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor: code.length === 6 ? '#006e2f' : '#e0f2e9',
-              opacity: loading || code.length !== 6 ? 0.7 : 1,
+        {/* OTP Input Section */}
+        <View className="mb-8">
+          <Text className="label-sm font-semibold text-on-surface text-center mb-6 uppercase tracking-widest">
+            Enter code
+          </Text>
+
+          {/* Hidden TextInput for keyboard capture */}
+          <TextInput
+            ref={(ref) => (inputRefs.current[0] = ref)}
+            value={otpDigits.join('')}
+            onChangeText={(text) => {
+              const digits = text.replace(/[^0-9]/g, '').slice(0, 6);
+              const newDigits = digits.split('');
+              while (newDigits.length < 6) newDigits.push('');
+              setOtpDigits(newDigits);
+              if (digits.length === 6) setError('');
             }}
-          >
-            {loading ? (
-              <ActivityIndicator color="#ffffff" size="small" />
-            ) : (
-              <Text style={{ fontSize: 11, fontWeight: '700', color: '#ffffff' }}>
-                Verify Code
-              </Text>
-            )}
-          </TouchableOpacity>
+            keyboardType="number-pad"
+            maxLength={6}
+            style={{ position: 'absolute', opacity: 0 }}
+          />
 
-          {/* Resend Section */}
-          <View style={{ alignItems: 'center', marginBottom: 32 }}>
-            {canResend ? (
-              <TouchableOpacity onPress={handleResend} disabled={resending}>
-                {resending ? (
-                  <ActivityIndicator color="#006e2f" size="small" />
-                ) : (
-                  <Text style={{ fontSize: 14, fontWeight: '700', color: '#006e2f' }}>
-                    Resend reset code
-                  </Text>
-                )}
-              </TouchableOpacity>
-            ) : (
-              <Text style={{ fontSize: 14, color: '#49454e' }}>
-                Resend code in{' '}
-                <Text
-                  style={{
-                    fontWeight: '700',
-                    color: '#1c1b1f',
-                    fontFamily: 'JetBrains Mono',
-                  }}
-                >
-                  {formatCountdown(countdown)}
+          {/* OTP Display Boxes */}
+          <View className="flex-row justify-center gap-3">
+            {otpDigits.map((digit, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => handleOtpBoxPress(index)}
+                activeOpacity={0.7}
+                className="w-14 h-14 border-2 rounded-lg items-center justify-center"
+                style={{
+                  borderColor: digit ? c.primary.DEFAULT : c.outline,
+                  backgroundColor: digit ? c.primary50 : c.surface,
+                }}
+              >
+                <Text className="text-2xl font-bold text-on-surface">
+                  {digit}
                 </Text>
-              </Text>
-            )}
+
+                {/* Hidden TextInput for each box */}
+                <TextInput
+                  ref={(ref) => (inputRefs.current[index] = ref)}
+                  value={digit}
+                  onChangeText={(value) => handleOtpChange(index, value)}
+                  onKeyPress={(e) => handleKeyPress(index, e.nativeEvent.key)}
+                  keyboardType="number-pad"
+                  maxLength={1}
+                  style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    opacity: 0,
+                  }}
+                />
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+        {/* Verify Button */}
+        <TouchableOpacity
+          onPress={handleVerify}
+          disabled={loading || code.length !== 6}
+          className="bg-primary rounded-lg py-4 mb-6 flex-row justify-center items-center"
+          style={{ opacity: loading || code.length !== 6 ? 0.6 : 1 }}
+        >
+          {loading ? (
+            <ActivityIndicator color="#ffffff" size="small" />
+          ) : (
+            <Text className="label-sm font-bold text-white">Verify Code</Text>
+          )}
+        </TouchableOpacity>
+
+        {/* Resend Section */}
+        <View className="items-center">
+          {canResend ? (
+            <TouchableOpacity onPress={handleResend} disabled={resending}>
+              {resending ? (
+                <ActivityIndicator color={c.primary.DEFAULT} size="small" />
+              ) : (
+                <View className="flex-row items-center gap-1">
+                  <Feather name="rotate-cw" size={14} color={c.primary.DEFAULT} />
+                  <Text className="label-sm font-bold text-primary">
+                    Resend reset code
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ) : (
+            <Text className="body-sm text-on-surface-variant">
+              Resend code in{' '}
+              <Text className="font-bold text-on-surface">
+                {formatCountdown(countdown)}
+              </Text>
+            </Text>
+          )}
+        </View>
+      </View>
+    </KeyboardAwareScrollView>
   );
 }

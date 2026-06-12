@@ -66,8 +66,14 @@
     --color-on-tertiary-fixed: #0b1c30;
     --color-on-tertiary-fixed-variant: #38485d;
 
+    /* On Colors */
+    --color-on-primary: #ffffff;
+    --color-on-secondary: #ffffff;
+    --color-on-tertiary: #ffffff;
+
     /* Error */
     --color-error: #ba1a1a;
+    --color-on-error: #ffffff;
     --color-error-container: #ffdad6;
     --color-on-error-container: #93000a;
 
@@ -145,7 +151,9 @@
   }
 
   .dark {
-    --color-primary: #006e2f;
+    /* Primary - bright green for visibility on dark surfaces */
+    --color-primary: #4ae176;
+    --color-on-primary: #002109;
     --color-primary-50: #0c2818;
     --color-primary-100: #145231;
     --color-primary-200: #166534;
@@ -157,14 +165,16 @@
     --color-primary-800: #bbf7d0;
     --color-primary-900: #dcfce7;
     --color-primary-950: #f0fdf4;
-    --color-primary-container: #15803d;
+    --color-primary-container: #005321;
     --color-on-primary-container: #bbf7d0;
-    --color-primary-fixed: #145231;
-    --color-primary-fixed-dim: #166534;
-    --color-on-primary-fixed: #dcfce7;
-    --color-on-primary-fixed-variant: #bbf7d0;
+    --color-primary-fixed: #6bff8f;
+    --color-primary-fixed-dim: #4ae176;
+    --color-on-primary-fixed: #002109;
+    --color-on-primary-fixed-variant: #005321;
 
+    /* Secondary - light navy for dark mode */
     --color-secondary: #dae2fd;
+    --color-on-secondary: #131b2e;
     --color-secondary-50: #020617;
     --color-secondary-100: #0f172a;
     --color-secondary-200: #1e293b;
@@ -176,14 +186,16 @@
     --color-secondary-800: #e2e8f0;
     --color-secondary-900: #f1f5f9;
     --color-secondary-950: #f8fafc;
-    --color-secondary-container: #334155;
-    --color-on-secondary-container: #e2e8f0;
-    --color-secondary-fixed: #1e293b;
-    --color-secondary-fixed-dim: #334155;
-    --color-on-secondary-fixed: #e2e8f0;
-    --color-on-secondary-fixed-variant: #cbd5e1;
+    --color-secondary-container: #2e3650;
+    --color-on-secondary-container: #dae2fd;
+    --color-secondary-fixed: #dae2fd;
+    --color-secondary-fixed-dim: #bec6e0;
+    --color-on-secondary-fixed: #131b2e;
+    --color-on-secondary-fixed-variant: #3f465c;
 
+    /* Tertiary - light slate for dark mode */
     --color-tertiary: #b7c8e1;
+    --color-on-tertiary: #0b1c30;
     --color-tertiary-50: #0b1c30;
     --color-tertiary-100: #1e293b;
     --color-tertiary-200: #334155;
@@ -194,21 +206,24 @@
     --color-tertiary-700: #e2e8f0;
     --color-tertiary-800: #f1f5f9;
     --color-tertiary-900: #f8fafc;
-    --color-tertiary-container: #475569;
-    --color-on-tertiary-container: #e2e8f0;
-    --color-tertiary-fixed: #1e293b;
-    --color-tertiary-fixed-dim: #334155;
-    --color-on-tertiary-fixed: #e2e8f0;
-    --color-on-tertiary-fixed-variant: #cbd5e1;
+    --color-tertiary-container: #37475e;
+    --color-on-tertiary-container: #d3e4fe;
+    --color-tertiary-fixed: #d3e4fe;
+    --color-tertiary-fixed-dim: #b7c8e1;
+    --color-on-tertiary-fixed: #0b1c30;
+    --color-on-tertiary-fixed-variant: #38485d;
 
+    /* Error */
     --color-error: #ffb4ab;
+    --color-on-error: #5a0e08;
     --color-error-container: #93000a;
     --color-on-error-container: #ffdad6;
 
+    /* Surface & Backgrounds */
     --color-surface: #121415;
     --color-surface-dim: #0b0d0e;
     --color-surface-bright: #3b3d3e;
-    --color-surface-container-lowest: #45555b;
+    --color-surface-container-lowest: #070809;
     --color-surface-container-low: #1a1c1e;
     --color-surface-container: #1e2022;
     --color-surface-container-high: #282a2c;
@@ -216,13 +231,16 @@
     --color-on-surface: #e1e3e5;
     --color-on-surface-variant: #bcc9bc;
 
+    /* Inverse */
     --color-inverse-surface: #e1e3e5;
     --color-inverse-on-surface: #2d3133;
     --color-inverse-primary: #006e2f;
 
+    /* Outline */
     --color-outline: #869486;
     --color-outline-variant: #3d4a3d;
 
+    /* Background */
     --color-background: #121415;
     --color-on-background: #e1e3e5;
     --color-surface-variant: #3d403d;
@@ -316,6 +334,22 @@
 
   .bg-surface-container {
     background-color: var(--color-surface-container);
+  }
+
+  .bg-surface-variant {
+    background-color: var(--color-surface-variant);
+  }
+
+  .bg-primary-50 {
+    background-color: var(--color-primary-50);
+  }
+
+  .bg-primary-500 {
+    background-color: var(--color-primary-500);
+  }
+
+  .bg-secondary-100 {
+    background-color: var(--color-secondary-100);
   }
 
   .bg-error-container {

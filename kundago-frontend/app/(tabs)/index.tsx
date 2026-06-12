@@ -19,7 +19,7 @@ const categories = [
   { id: 1, name: 'Groceries', image: require('@/assets/images/groceries.png') },
   { id: 2, name: 'Household/Electronics', image: require('@/assets/images/household-electtonics.png') },
   { id: 3, name: 'Construction', image: require('@/assets/images/construction.png') },
-  { id: 4, name: 'Pharmacy & Health', image: require('@/assets/images/pharmacy-health.png') },
+  { id: 4, name: 'Personal Care', image: require('@/assets/images/pharmacy-health.png') },
 ];
 
 const popularItems = [
@@ -159,7 +159,7 @@ export default function HomeScreen() {
 
     <ScrollView className="flex-1 bg-surface" contentContainerStyle={{ paddingBottom: 24 }}>
 
-      <View className="mx-4 mt-5 mb-2">
+      <View className="mx-4 mt-5 mb-2 relative">
         <FlatList
           ref={bannerRef}
           data={banners}
@@ -179,14 +179,14 @@ export default function HomeScreen() {
               <Image
                 source={item.source}
                 className="w-full rounded-xl"
-                style={{ height: 180, resizeMode: "cover" }}
+          style={{ height: 180, resizeMode: "contain" }}
               />
             </View>
           )}
           keyExtractor={(item) => item.id.toString()}
         />
 
-        <View className="flex-row justify-center gap-2 mt-3">
+        <View className="absolute bottom-5 left-0 right-0 flex-row justify-center gap-2">
           {banners.map((_, index) => (
             <View
               key={index}
@@ -200,7 +200,39 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <View className="px-4 mt-6 mb-6">
+      <View className="px-4 mt-4 mb-6">
+        <View className="flex-row bg-surface-container rounded-lg">
+          <View className="flex-1 flex-row items-center gap-3 px-3 py-3">
+            <Feather name="truck" size={15} color={c.primary.DEFAULT} />
+            <Text className="text-[6px] font-semibold text-on-surface flex-1">
+              Same-day or next-day delivery
+            </Text>
+          </View>
+          <View className="w-px bg-surface" />
+          <View className="flex-1 flex-row items-center gap-3 px-3 py-3">
+            <Feather name="shield" size={15} color={c.primary.DEFAULT} />
+            <Text className="text-[6px] font-semibold text-on-surface flex-1">
+              Secure payments
+            </Text>
+          </View>
+          <View className="w-px bg-surface" />
+          <View className="flex-1 flex-row items-center gap-3 px-3 py-3">
+            <Feather name="users" size={15} color={c.primary.DEFAULT} />
+            <Text className="text-[6px] font-semibold text-on-surface flex-1">
+              Trusted by Gambian families
+            </Text>
+          </View>
+          <View className="w-px bg-surface" />
+          <View className="flex-1 flex-row items-center gap-3 px-3 py-3">
+            <Feather name="headphones" size={15} color={c.primary.DEFAULT} />
+            <Text className="text-[6px] font-semibold text-on-surface flex-1">
+              24/7 Customer support
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      <View className="px-4 mb-6">
         <View className="flex-row justify-between items-center mb-4">
           <Text className="text-headline-md text-on-surface">
             Categories
@@ -278,6 +310,14 @@ export default function HomeScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           scrollEnabled={true}
+        />
+      </View>
+
+      <View className="px-4 mb-6">
+        <Image
+          source={require('@/assets/images/Banner-2.png')}
+          className="w-full rounded-lg"
+          style={{ height: 100, resizeMode: "contain" }}
         />
       </View>
 

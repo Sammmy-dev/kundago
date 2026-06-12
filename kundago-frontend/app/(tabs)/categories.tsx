@@ -24,14 +24,14 @@ const categoryImages: Record<string, any> = {
   Groceries: require('@/assets/images/groceries.png'),
   'Household/Electronics': require('@/assets/images/household-electtonics.png'),
   Construction: require('@/assets/images/construction.png'),
-  'Pharmacy & Health': require('@/assets/images/pharmacy-health.png'),
+  'Personal Care': require('@/assets/images/pharmacy-health.png'),
 };
 
 const categoryIcons: Record<string, string> = {
   Groceries: 'shopping-cart',
   'Household/Electronics': 'zap',
   Construction: 'tool',
-  'Pharmacy & Health': 'heart',
+  'Personal Care': 'heart',
 };
 
 export default function CategoriesScreen() {

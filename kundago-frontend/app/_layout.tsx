@@ -17,6 +17,7 @@ export const unstable_settings = {
 export default function RootLayout() {
   const [queryClient] = useState(() => new QueryClient());
   const isDark = useThemeStore((s) => s.isDark);
+  const loaded = useThemeStore((s) => s.loaded);
   const c = isDark ? DarkColors : Colors;
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export default function RootLayout() {
           <ToastProvider>
             <Stack
               screenOptions={{
-                contentStyle: { backgroundColor: c.surface.DEFAULT },
+                contentStyle: { backgroundColor: loaded ? c.surface.DEFAULT : undefined },
               }}
             >
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
