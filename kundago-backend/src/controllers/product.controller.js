@@ -12,23 +12,23 @@ import cloudinary from '../config/cloudinary.js';
  */
 export const getProducts = async (req, res) => {
   try {
-    const { category, search, sort } = req.query;
+    const { category, search, sort, page = 1, limit = 20 } = req.query;
 
-    // Build query object
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
+    const skip = (pageNum - 1) * limitNum;
+
     const query = { isActive: true };
 
-    // 1. Filter by category
     if (category) {
       query.category = category;
     }
 
-    // 2. Search by name (case-insensitive)
     if (search) {
       query.name = { $regex: search, $options: 'i' };
     }
 
-    // 3. Sorting logic
-    let sortOption = { createdAt: -1 }; // Default: newest first
+    let sortOption = { createdAt: -1 };
 
     if (sort) {
       switch (sort) {
@@ -55,11 +55,18 @@ export const getProducts = async (req, res) => {
       }
     }
 
-    const products = await Product.find(query).sort(sortOption);
+    const [total, products] = await Promise.all([
+      Product.countDocuments(query),
+      Product.find(query).sort(sortOption).skip(skip).limit(limitNum)
+    ]);
 
     res.status(200).json({
       success: true,
       count: products.length,
+      total,
+      totalPages: Math.ceil(total / limitNum),
+      currentPage: pageNum,
+      hasMore: pageNum * limitNum < total,
       data: {
         products
       }
@@ -473,6 +480,7 @@ export const getAdminProducts = async (req, res) => {
 export const getProductsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
+    const { page = 1, limit = 20 } = req.query;
 
     if (!category) {
       return res.status(400).json({
@@ -481,11 +489,23 @@ export const getProductsByCategory = async (req, res) => {
       });
     }
 
-    const products = await Product.findByCategory(category, true);
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
+    const skip = (pageNum - 1) * limitNum;
+    const query = { category, isActive: true };
+
+    const [total, products] = await Promise.all([
+      Product.countDocuments(query),
+      Product.find(query).sort({ createdAt: -1 }).skip(skip).limit(limitNum)
+    ]);
 
     res.status(200).json({
       success: true,
       count: products.length,
+      total,
+      totalPages: Math.ceil(total / limitNum),
+      currentPage: pageNum,
+      hasMore: pageNum * limitNum < total,
       data: {
         products,
         category

@@ -1,6 +1,6 @@
 import '@/global.css';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { View, Text, TextInput, TouchableOpacity, FlatList, Image, ActivityIndicator, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, Image, ActivityIndicator, Alert } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -46,6 +46,10 @@ export default function CategoriesScreen() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [addingId, setAddingId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (categoryParam) setSelectedCategory(categoryParam);
@@ -54,21 +58,49 @@ export default function CategoriesScreen() {
   const categories = Object.keys(categoryImages);
   const chipCategories = ['All', ...categories];
 
-  const fetchProducts = useCallback(async (category?: string) => {
-    setLoading(true);
+  const fetchProducts = useCallback(async (pageNum: number, category?: string, replace = true) => {
+    if (replace) {
+      setLoading(true);
+    } else {
+      setLoadingMore(true);
+    }
     try {
       const url = category ? `/products/category/${encodeURIComponent(category)}` : '/products';
-      const res = await api.get(url);
-      setProducts(res.data?.data?.products || []);
+      const res = await api.get(url, { params: { page: pageNum, limit: 20 } });
+      const newProducts = res.data?.data?.products || [];
+      if (replace) {
+        setProducts(newProducts);
+      } else {
+        setProducts((prev) => [...prev, ...newProducts]);
+      }
+      setHasMore(res.data?.hasMore ?? false);
+      setPage(pageNum);
     } catch {
-      setProducts([]);
+      if (replace) setProducts([]);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchProducts(selectedCategory || undefined);
+    setPage(1);
+    setHasMore(true);
+    fetchProducts(1, selectedCategory || undefined, true);
+  }, [selectedCategory, fetchProducts]);
+
+  const loadMore = () => {
+    if (!loadingMore && hasMore) {
+      fetchProducts(page + 1, selectedCategory || undefined, false);
+    }
+  };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    setPage(1);
+    setHasMore(true);
+    await fetchProducts(1, selectedCategory || undefined, true);
+    setRefreshing(false);
   }, [selectedCategory, fetchProducts]);
 
   const filteredProducts = products.filter((p) =>
@@ -163,33 +195,48 @@ export default function CategoriesScreen() {
         />
       </View>
 
-      <ScrollView className="flex-1 px-4">
-        <Text className="headline-md text-on-surface font-black mb-4">
-          {selectedCategory || 'All Products'}
-        </Text>
-
-        {loading ? (
-          <View className="py-10 items-center">
-            <ActivityIndicator color={c.primary.DEFAULT} size="large" />
-          </View>
-        ) : filteredProducts.length === 0 ? (
-          <View className="py-10 items-center">
-            <Feather name="package" size={40} color={c.onSurfaceVariant} />
-            <Text className="body-md text-on-surface-variant mt-3">
-              {searchText ? 'No products match your search' : 'No products yet'}
+      {loading ? (
+        <View className="py-10 items-center">
+          <ActivityIndicator color={c.primary.DEFAULT} size="large" />
+        </View>
+      ) : (
+        <FlatList
+          className="flex-1 px-4"
+          data={filteredProducts}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => (
+            <View className="w-[48%] mb-3">
+              {renderProduct({ item })}
+            </View>
+          )}
+          numColumns={2}
+          columnWrapperStyle={{ justifyContent: 'space-between' }}
+          ListHeaderComponent={
+            <Text className="headline-md text-on-surface font-black mb-4 pt-2">
+              {selectedCategory || 'All Products'}
             </Text>
-          </View>
-        ) : (
-          <View className="flex-row flex-wrap gap-3">
-            {filteredProducts.map((item) => (
-              <View key={item._id} className="w-[48%]">
-                {renderProduct({ item })}
+          }
+          ListEmptyComponent={
+            <View className="py-10 items-center">
+              <Feather name="package" size={40} color={c.onSurfaceVariant} />
+              <Text className="body-md text-on-surface-variant mt-3">
+                {searchText ? 'No products match your search' : 'No products yet'}
+              </Text>
+            </View>
+          }
+          ListFooterComponent={
+            loadingMore ? (
+              <View className="py-4 items-center">
+                <ActivityIndicator color={c.primary.DEFAULT} size="small" />
               </View>
-            ))}
-          </View>
-        )}
-        <View className="h-6" />
-      </ScrollView>
+            ) : null
+          }
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.3}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+        />
+      )}
     </View>
   );
 }

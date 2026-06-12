@@ -1,9 +1,9 @@
 import '@/global.css';
-import { View, Text, TextInput, TouchableOpacity, Image, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, ActivityIndicator, FlatList } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { useThemeColors } from '@/constants/theme';
 import { useAuthStore } from '@/lib/stores/auth';
@@ -28,37 +28,73 @@ export default function SearchScreen() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [addingId, setAddingId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchResults = async (searchTerm: string) => {
+  const fetchResults = async (searchTerm: string, pageNum: number = 1, replace: boolean = true) => {
     if (!searchTerm.trim()) {
-      setProducts([]);
-      setLoading(false);
+      if (replace) setProducts([]);
       return;
     }
-    setLoading(true);
+    if (replace) {
+      setLoading(true);
+    } else {
+      setLoadingMore(true);
+    }
     try {
-      const res = await api.get(`/products?search=${encodeURIComponent(searchTerm)}`);
-      setProducts(res.data?.data?.products || []);
+      const res = await api.get('/products', {
+        params: { search: searchTerm, page: pageNum, limit: 20 }
+      });
+      const newProducts = res.data?.data?.products || [];
+      if (replace) {
+        setProducts(newProducts);
+      } else {
+        setProducts((prev) => [...prev, ...newProducts]);
+      }
+      setHasMore(res.data?.hasMore ?? false);
+      setPage(pageNum);
     } catch {
-      setProducts([]);
+      if (replace) setProducts([]);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
   useEffect(() => {
     if (q) {
       setQuery(q);
-      fetchResults(q);
+      setPage(1);
+      setHasMore(true);
+      fetchResults(q, 1, true);
     }
   }, [q]);
 
   const handleSearch = () => {
     if (query.trim()) {
       router.setParams({ q: query.trim() });
-      fetchResults(query.trim());
+      setPage(1);
+      setHasMore(true);
+      fetchResults(query.trim(), 1, true);
     }
   };
+
+  const loadMore = () => {
+    if (!loadingMore && hasMore && q) {
+      fetchResults(q, page + 1, false);
+    }
+  };
+
+  const onRefresh = useCallback(async () => {
+    if (!q) return;
+    setRefreshing(true);
+    setPage(1);
+    setHasMore(true);
+    await fetchResults(q, 1, true);
+    setRefreshing(false);
+  }, [q]);
 
   const addToCart = async (productId: string) => {
     if (!user) {
@@ -78,7 +114,7 @@ export default function SearchScreen() {
 
   const formatPrice = (price: number) => `D${price.toLocaleString()}`;
 
-  const renderProduct = (item: Product) => (
+  const renderProduct = ({ item }: { item: Product }) => (
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={() => router.push(`/product/${item._id}`)}
@@ -158,19 +194,45 @@ export default function SearchScreen() {
           </Text>
         </View>
       ) : (
-        <ScrollView className="flex-1 px-4">
-          <Text className="headline-md text-on-surface font-black mb-4">
-            Results for "{q}"
-          </Text>
-          <View className="flex-row flex-wrap gap-3">
-            {products.map((item) => (
-              <View key={item._id} className="w-[48%]">
-                {renderProduct(item)}
+        <FlatList
+          className="flex-1 px-4"
+          data={products}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => (
+            <View className="w-[48%] mb-3">
+              {renderProduct({ item })}
+            </View>
+          )}
+          numColumns={2}
+          columnWrapperStyle={{ justifyContent: 'space-between' }}
+          ListHeaderComponent={
+            <Text className="headline-md text-on-surface font-black mb-4 pt-2">
+              Results for "{q}"
+            </Text>
+          }
+          ListEmptyComponent={
+            <View className="py-10 items-center">
+              <View className="w-16 h-16 bg-primary-50 rounded-full items-center justify-center mb-4">
+                <Feather name="search" size={28} color={c.primary.DEFAULT} />
               </View>
-            ))}
-          </View>
-          <View className="h-6" />
-        </ScrollView>
+              <Text className="headline-md text-on-surface font-black mb-2">No results found</Text>
+              <Text className="body-md text-on-surface-variant text-center">
+                No products match "{q}"
+              </Text>
+            </View>
+          }
+          ListFooterComponent={
+            loadingMore ? (
+              <View className="py-4 items-center">
+                <ActivityIndicator color={c.primary.DEFAULT} size="small" />
+              </View>
+            ) : null
+          }
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.3}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+        />
       )}
     </View>
   );
