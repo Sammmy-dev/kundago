@@ -16,10 +16,18 @@ export async function initDeliveryTiers() {
     if (count === 0) {
       await DeliveryTier.insertMany(DEFAULT_TIERS.map((t) => ({ ...t })));
     }
+    await refreshTiersCache();
+  } catch (error) {
+    console.error('Failed to init delivery tiers, using defaults:', error.message);
+  }
+}
+
+export async function refreshTiersCache() {
+  try {
     const tiers = await DeliveryTier.find().sort({ max: 1 }).lean();
     tiersCache = tiers.map((t) => ({ max: t.max, fee: t.fee, label: t.label }));
   } catch (error) {
-    console.error('Failed to init delivery tiers, using defaults:', error.message);
+    console.error('Failed to refresh tiers cache:', error.message);
   }
 }
 

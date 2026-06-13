@@ -1,5 +1,6 @@
 import { DeliveryTier } from '../models/index.js';
 import { logger } from '../config/index.js';
+import { refreshTiersCache } from '../utils/delivery.js';
 
 export const getDeliveryTiers = async (req, res) => {
   try {
@@ -49,6 +50,8 @@ export const updateDeliveryTier = async (req, res) => {
         message: 'Delivery tier not found',
       });
     }
+
+    await refreshTiersCache();
 
     res.status(200).json({
       success: true,
