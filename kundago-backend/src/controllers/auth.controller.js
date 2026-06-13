@@ -672,7 +672,7 @@ export const verifyEmail = async (req, res) => {
  */
 export const deleteAccount = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
 
     await Promise.all([
       Cart.deleteMany({ userId }),

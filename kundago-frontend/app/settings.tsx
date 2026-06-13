@@ -30,7 +30,7 @@ export default function SettingsScreen() {
             try {
               await api.delete('/auth/account');
               logout();
-              router.replace('/auth/login');
+              router.replace('/(auth)/sign-in');
             } catch {
               Alert.alert('Error', 'Failed to delete account. Please try again.');
             }
