@@ -1,5 +1,5 @@
 import '@/global.css';
-import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, Linking } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useThemeColors } from '@/constants/theme';
@@ -62,6 +62,10 @@ export default function AboutScreen() {
             </View>
           </View>
           </View>
+
+        <TouchableOpacity onPress={() => Linking.openURL('https://kundago.vercel.app/privacy-policy')} className="py-3 items-center">
+          <Text className="body-sm text-primary underline">Privacy Policy</Text>
+        </TouchableOpacity>
 
         <Text className="body-sm text-on-surface-variant text-center mb-8">
           © 2026 KundaGo. All rights reserved.

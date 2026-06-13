@@ -265,6 +265,14 @@ export default function HomeScreen() {
       </View>
 
       <View className="px-4 mb-6">
+        <Image
+          source={require('@/assets/images/Banner-2.png')}
+          className="w-full rounded-lg"
+          style={{ height: 100, resizeMode: "contain" }}
+        />
+      </View>
+
+      <View className="px-4 mb-6">
         <View className="flex-row justify-between items-center mb-4">
           <Text className="text-headline-md text-on-surface">
             Popular
@@ -310,14 +318,6 @@ export default function HomeScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           scrollEnabled={true}
-        />
-      </View>
-
-      <View className="px-4 mb-6">
-        <Image
-          source={require('@/assets/images/Banner-2.png')}
-          className="w-full rounded-lg"
-          style={{ height: 100, resizeMode: "contain" }}
         />
       </View>
 
