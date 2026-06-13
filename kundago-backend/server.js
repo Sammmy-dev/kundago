@@ -1,10 +1,14 @@
 import app from './src/app.js';
 import { env, logger, connectDatabase, disconnectDatabase } from './src/config/index.js';
+import { initDeliveryTiers } from './src/utils/delivery.js';
 
 const startServer = async () => {
   try {
     // Connect to MongoDB
     await connectDatabase();
+
+    // Initialise delivery tiers in DB
+    await initDeliveryTiers();
 
     // Start the Express server
     const server = app.listen(env.port, () => {

@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import { env, logger } from './config/index.js';
-import { authRoutes, productRoutes, adminProductRoutes, cartRoutes, orderRoutes, adminOrderRoutes, parcelRoutes, adminParcelRoutes, addressRoutes, paymentRoutes, adminUserRoutes } from './routes/index.js';
+import { authRoutes, productRoutes, adminProductRoutes, cartRoutes, orderRoutes, adminOrderRoutes, parcelRoutes, adminParcelRoutes, addressRoutes, paymentRoutes, adminUserRoutes, adminDeliveryTierRoutes } from './routes/index.js';
 import swaggerSpec from '../swagger.js';
 
 // Initialize Express app
@@ -178,6 +178,9 @@ app.use('/payments', paymentRoutes);
 
 // Admin user routes (protected)
 app.use('/admin/users', adminUserRoutes);
+
+// Admin delivery tier routes (protected)
+app.use('/admin/delivery-tiers', adminDeliveryTierRoutes);
 
 // ============================================
 // 404 HANDLER

@@ -9,3 +9,4 @@ export { default as adminParcelRoutes } from './admin.parcel.routes.js';
 export { default as addressRoutes } from './address.routes.js';
 export { default as paymentRoutes } from './payment.routes.js';
 export { default as adminUserRoutes } from './admin.user.routes.js';
+export { default as adminDeliveryTierRoutes } from './admin.delivery-tier.routes.js';

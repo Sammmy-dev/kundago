@@ -5,3 +5,4 @@ export { default as Order, PAYMENT_METHODS, PAYMENT_STATUSES, ORDER_STATUSES } f
 export { default as Parcel, PARCEL_STATUSES, PACKAGE_SIZES } from './Parcel.js';
 export { default as Payment, PAYMENT_STATUS_VALUES, RELATED_TYPES } from './Payment.js';
 export { default as Address } from './Address.js';
+export { default as DeliveryTier } from './DeliveryTier.js';
