@@ -47,9 +47,6 @@ const cartSchema = new mongoose.Schema(
   }
 );
 
-// Index for user lookup
-cartSchema.index({ userId: 1 });
-
 /**
  * Static method to find or create cart for user
  * @param {ObjectId} userId - User's ID

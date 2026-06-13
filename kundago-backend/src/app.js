@@ -10,6 +10,9 @@ import swaggerSpec from '../swagger.js';
 // Initialize Express app
 const app = express();
 
+// Trust proxy for rate limiting behind reverse proxy (Render)
+app.set('trust proxy', 1);
+
 // ============================================
 // SECURITY MIDDLEWARE
 // ============================================
@@ -94,6 +97,18 @@ app.use((req, res, next) => {
   });
   
   next();
+});
+
+// ============================================
+// ROOT ENDPOINT
+// ============================================
+
+app.all('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'KundaGo API',
+    environment: env.nodeEnv
+  });
 });
 
 // ============================================

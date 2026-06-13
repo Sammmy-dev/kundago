@@ -100,9 +100,6 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Index for faster email lookups
-userSchema.index({ email: 1 });
-
 /**
  * Pre-save middleware to hash password
  * Only hashes if password is new or modified

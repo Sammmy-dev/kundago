@@ -40,9 +40,6 @@ const addressSchema = new mongoose.Schema(
   }
 );
 
-// Index for user lookup
-addressSchema.index({ userId: 1 });
-
 /**
  * Static method to find addresses by user
  * @param {ObjectId} userId - User's ID
