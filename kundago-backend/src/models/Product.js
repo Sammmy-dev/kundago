@@ -54,13 +54,14 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-// Index for active products queries
-productSchema.index({ isActive: 1 });
+// Compound indexes for common query + sort patterns
+productSchema.index({ isActive: 1, createdAt: -1 });
+productSchema.index({ isActive: 1, category: 1, createdAt: -1 });
+productSchema.index({ isActive: 1, price: 1 });
+productSchema.index({ isActive: 1, price: -1 });
+productSchema.index({ isActive: 1, name: 1 });
 
-// Index for category queries
-productSchema.index({ category: 1, isActive: 1 });
-
-// Index for product name search
+// Index for text search
 productSchema.index({ name: 'text' });
 
 /**

@@ -2,6 +2,30 @@ import { Cart, Product } from '../models/index.js';
 import { logger } from '../config/index.js';
 import { calculateDeliveryFee } from '../utils/delivery.js';
 
+const CART_POPULATE_FIELDS = 'name price images isActive stock weight';
+
+async function populateCartItems(items) {
+  const productIds = [...new Set(items.map((item) => item.productId.toString()))];
+  const products = productIds.length > 0
+    ? await Product.find({ _id: { $in: productIds } }).lean().select(CART_POPULATE_FIELDS)
+    : [];
+  const productMap = new Map(products.map((p) => [p._id.toString(), p]));
+
+  return items.map((item) => ({
+    quantity: item.quantity,
+    priceAtTime: item.priceAtTime,
+    productId: productMap.get(item.productId.toString()) || {
+      _id: item.productId,
+      name: 'Unavailable',
+      price: 0,
+      images: [],
+      isActive: false,
+      stock: 0,
+      weight: 0
+    }
+  }));
+}
+
 /**
  * @desc    Get user's cart
  * @route   GET /cart
@@ -11,12 +35,10 @@ export const getCart = async (req, res) => {
   try {
     const { userId } = req.user;
 
-    // Find or create cart for user (one cart per user)
     const cart = await Cart.findOrCreateByUserId(userId);
+    const items = await populateCartItems(cart.items);
 
-    await cart.populate('items.productId', 'name price images isActive stock weight');
-
-    const weights = cart.items.map((item) => item.productId?.weight || 0);
+    const weights = items.map((item) => item.productId?.weight || 0);
     const { fee: deliveryFee } = calculateDeliveryFee(weights);
     const subtotal = cart.calculateTotal();
 
@@ -26,8 +48,8 @@ export const getCart = async (req, res) => {
         cart: {
           _id: cart._id,
           userId: cart.userId,
-          items: cart.items,
-          totalItems: cart.items.length,
+          items,
+          totalItems: items.length,
           totalAmount: subtotal,
           deliveryFee,
           grandTotal: subtotal + deliveryFee,
@@ -109,9 +131,9 @@ export const addToCart = async (req, res) => {
     await cart.save();
 
     // Populate for response
-    await cart.populate('items.productId', 'name price images isActive stock weight');
+    const addItems = await populateCartItems(cart.items);
 
-    const addWeights = cart.items.map((item) => item.productId?.weight || 0);
+    const addWeights = addItems.map((item) => item.productId?.weight || 0);
     const { fee: addDeliveryFee } = calculateDeliveryFee(addWeights);
     const addSubtotal = cart.calculateTotal();
 
@@ -123,8 +145,8 @@ export const addToCart = async (req, res) => {
       data: {
         cart: {
           _id: cart._id,
-          items: cart.items,
-          totalItems: cart.items.length,
+          items: addItems,
+          totalItems: addItems.length,
           totalAmount: addSubtotal,
           deliveryFee: addDeliveryFee,
           grandTotal: addSubtotal + addDeliveryFee
@@ -181,9 +203,9 @@ export const updateCartItem = async (req, res) => {
       cart.removeItem(productId);
       await cart.save();
 
-      await cart.populate('items.productId', 'name price images isActive stock weight');
+      const removeItems = await populateCartItems(cart.items);
 
-      const removeWeights = cart.items.map((item) => item.productId?.weight || 0);
+      const removeWeights = removeItems.map((item) => item.productId?.weight || 0);
       const { fee: removeDeliveryFee } = calculateDeliveryFee(removeWeights);
       const removeSubtotal = cart.calculateTotal();
 
@@ -193,8 +215,8 @@ export const updateCartItem = async (req, res) => {
         data: {
           cart: {
             _id: cart._id,
-            items: cart.items,
-            totalItems: cart.items.length,
+            items: removeItems,
+            totalItems: removeItems.length,
             totalAmount: removeSubtotal,
             deliveryFee: removeDeliveryFee,
             grandTotal: removeSubtotal + removeDeliveryFee
@@ -240,9 +262,9 @@ export const updateCartItem = async (req, res) => {
 
     await cart.save();
 
-    await cart.populate('items.productId', 'name price images isActive stock weight');
+    const updateItems = await populateCartItems(cart.items);
 
-    const updateWeights = cart.items.map((item) => item.productId?.weight || 0);
+    const updateWeights = updateItems.map((item) => item.productId?.weight || 0);
     const { fee: updateDeliveryFee } = calculateDeliveryFee(updateWeights);
     const updateSubtotal = cart.calculateTotal();
 
@@ -254,8 +276,8 @@ export const updateCartItem = async (req, res) => {
       data: {
         cart: {
           _id: cart._id,
-          items: cart.items,
-          totalItems: cart.items.length,
+          items: updateItems,
+          totalItems: updateItems.length,
           totalAmount: updateSubtotal,
           deliveryFee: updateDeliveryFee,
           grandTotal: updateSubtotal + updateDeliveryFee
@@ -311,9 +333,9 @@ export const removeFromCart = async (req, res) => {
 
     await cart.save();
 
-    await cart.populate('items.productId', 'name price images isActive stock weight');
+    const remItems = await populateCartItems(cart.items);
 
-    const remWeights = cart.items.map((item) => item.productId?.weight || 0);
+    const remWeights = remItems.map((item) => item.productId?.weight || 0);
     const { fee: remDeliveryFee } = calculateDeliveryFee(remWeights);
     const remSubtotal = cart.calculateTotal();
 
@@ -325,8 +347,8 @@ export const removeFromCart = async (req, res) => {
       data: {
         cart: {
           _id: cart._id,
-          items: cart.items,
-          totalItems: cart.items.length,
+          items: remItems,
+          totalItems: remItems.length,
           totalAmount: remSubtotal,
           deliveryFee: remDeliveryFee,
           grandTotal: remSubtotal + remDeliveryFee

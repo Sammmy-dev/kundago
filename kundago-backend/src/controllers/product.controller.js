@@ -57,7 +57,7 @@ export const getProducts = async (req, res) => {
 
     const [total, products] = await Promise.all([
       Product.countDocuments(query),
-      Product.find(query).sort(sortOption).skip(skip).limit(limitNum)
+      Product.find(query).sort(sortOption).skip(skip).limit(limitNum).lean()
     ]);
 
     res.status(200).json({
@@ -498,7 +498,7 @@ export const getProductsByCategory = async (req, res) => {
 
     const [total, products] = await Promise.all([
       Product.countDocuments(query),
-      Product.find(query).sort({ createdAt: -1 }).skip(skip).limit(limitNum)
+      Product.find(query).sort({ createdAt: -1 }).skip(skip).limit(limitNum).lean()
     ]);
 
     res.status(200).json({
