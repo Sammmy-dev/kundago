@@ -174,18 +174,19 @@ export const createProduct = async (req, res) => {
       });
     }
 
-    // Collect images from file uploads (multipart/form-data via multer)
+    const allImages = [];
+
     if (req.files && req.files.length > 0) {
-      req.files.forEach((file) => uploadedImageUrls.push(file.path));
+      req.files.forEach((file) => {
+        allImages.push(file.path);
+        uploadedImageUrls.push(file.path);
+      });
     }
 
-    // Also accept image URLs passed directly in the body
-    let bodyImageUrls = [];
     if (images) {
-      bodyImageUrls = Array.isArray(images) ? images : [images];
+      const bodyImageUrls = Array.isArray(images) ? images : [images];
+      allImages.push(...bodyImageUrls);
     }
-
-    const allImages = [...uploadedImageUrls, ...bodyImageUrls];
 
     const product = await Product.create({
       name,
@@ -266,30 +267,22 @@ export const updateProduct = async (req, res) => {
     // Handle images
     let newImages = [];
 
-    // 1. Handle explicit 'images' array from body (URLs)
-    if (images !== undefined) {
-      const bodyImageUrls = Array.isArray(images) ? images : [images];
-      newImages = bodyImageUrls;
+    if (req.files && req.files.length > 0) {
+      newImages = req.files.map((file) => file.path);
     }
 
-    // 2. Handle uploaded files
-    if (req.files && req.files.length > 0) {
-      const uploadedUrls = req.files.map((file) => file.path);
-      
-      if (images !== undefined) {
-        // If both URLs and files provided, combine them
-        newImages = [...newImages, ...uploadedUrls];
+    if (images !== undefined) {
+      const bodyImageUrls = Array.isArray(images) ? images : [images];
+      if (req.files && req.files.length > 0) {
+        newImages = [...newImages, ...bodyImageUrls];
       } else {
-        // If ONLY files provided, replace existing images with new files
-        newImages = uploadedUrls;
+        newImages = bodyImageUrls;
       }
-      
-      product.images = newImages;
-    } else if (images !== undefined) {
-       // If only URLs provided (no files), update to those URLs
-       product.images = newImages;
     }
-    // Else: if neither provided, keep existing product.images (do nothing)
+
+    if (newImages.length > 0 || images !== undefined) {
+      product.images = newImages;
+    }
 
     await product.save();
 
