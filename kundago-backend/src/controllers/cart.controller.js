@@ -1,5 +1,6 @@
 import { Cart, Product } from '../models/index.js';
 import { logger } from '../config/index.js';
+import { calculateDeliveryFee } from '../utils/delivery.js';
 
 /**
  * @desc    Get user's cart
@@ -13,8 +14,11 @@ export const getCart = async (req, res) => {
     // Find or create cart for user (one cart per user)
     const cart = await Cart.findOrCreateByUserId(userId);
 
-    // Populate product details for display
-    await cart.populate('items.productId', 'name price images isActive stock');
+    await cart.populate('items.productId', 'name price images isActive stock weight');
+
+    const weights = cart.items.map((item) => item.productId?.weight || 0);
+    const { fee: deliveryFee } = calculateDeliveryFee(weights);
+    const subtotal = cart.calculateTotal();
 
     res.status(200).json({
       success: true,
@@ -24,7 +28,9 @@ export const getCart = async (req, res) => {
           userId: cart.userId,
           items: cart.items,
           totalItems: cart.items.length,
-          totalAmount: cart.calculateTotal(),
+          totalAmount: subtotal,
+          deliveryFee,
+          grandTotal: subtotal + deliveryFee,
           updatedAt: cart.updatedAt
         }
       }
@@ -103,7 +109,11 @@ export const addToCart = async (req, res) => {
     await cart.save();
 
     // Populate for response
-    await cart.populate('items.productId', 'name price images isActive stock');
+    await cart.populate('items.productId', 'name price images isActive stock weight');
+
+    const addWeights = cart.items.map((item) => item.productId?.weight || 0);
+    const { fee: addDeliveryFee } = calculateDeliveryFee(addWeights);
+    const addSubtotal = cart.calculateTotal();
 
     logger.info(`Item added to cart`, { userId, productId, quantity });
 
@@ -115,7 +125,9 @@ export const addToCart = async (req, res) => {
           _id: cart._id,
           items: cart.items,
           totalItems: cart.items.length,
-          totalAmount: cart.calculateTotal()
+          totalAmount: addSubtotal,
+          deliveryFee: addDeliveryFee,
+          grandTotal: addSubtotal + addDeliveryFee
         }
       }
     });
@@ -169,7 +181,11 @@ export const updateCartItem = async (req, res) => {
       cart.removeItem(productId);
       await cart.save();
 
-      await cart.populate('items.productId', 'name price images isActive stock');
+      await cart.populate('items.productId', 'name price images isActive stock weight');
+
+      const removeWeights = cart.items.map((item) => item.productId?.weight || 0);
+      const { fee: removeDeliveryFee } = calculateDeliveryFee(removeWeights);
+      const removeSubtotal = cart.calculateTotal();
 
       return res.status(200).json({
         success: true,
@@ -179,7 +195,9 @@ export const updateCartItem = async (req, res) => {
             _id: cart._id,
             items: cart.items,
             totalItems: cart.items.length,
-            totalAmount: cart.calculateTotal()
+            totalAmount: removeSubtotal,
+            deliveryFee: removeDeliveryFee,
+            grandTotal: removeSubtotal + removeDeliveryFee
           }
         }
       });
@@ -222,7 +240,11 @@ export const updateCartItem = async (req, res) => {
 
     await cart.save();
 
-    await cart.populate('items.productId', 'name price images isActive stock');
+    await cart.populate('items.productId', 'name price images isActive stock weight');
+
+    const updateWeights = cart.items.map((item) => item.productId?.weight || 0);
+    const { fee: updateDeliveryFee } = calculateDeliveryFee(updateWeights);
+    const updateSubtotal = cart.calculateTotal();
 
     logger.info(`Cart item updated`, { userId, productId, quantity });
 
@@ -234,7 +256,9 @@ export const updateCartItem = async (req, res) => {
           _id: cart._id,
           items: cart.items,
           totalItems: cart.items.length,
-          totalAmount: cart.calculateTotal()
+          totalAmount: updateSubtotal,
+          deliveryFee: updateDeliveryFee,
+          grandTotal: updateSubtotal + updateDeliveryFee
         }
       }
     });
@@ -287,7 +311,11 @@ export const removeFromCart = async (req, res) => {
 
     await cart.save();
 
-    await cart.populate('items.productId', 'name price images isActive stock');
+    await cart.populate('items.productId', 'name price images isActive stock weight');
+
+    const remWeights = cart.items.map((item) => item.productId?.weight || 0);
+    const { fee: remDeliveryFee } = calculateDeliveryFee(remWeights);
+    const remSubtotal = cart.calculateTotal();
 
     logger.info(`Item removed from cart`, { userId, productId });
 
@@ -299,7 +327,9 @@ export const removeFromCart = async (req, res) => {
           _id: cart._id,
           items: cart.items,
           totalItems: cart.items.length,
-          totalAmount: cart.calculateTotal()
+          totalAmount: remSubtotal,
+          deliveryFee: remDeliveryFee,
+          grandTotal: remSubtotal + remDeliveryFee
         }
       }
     });

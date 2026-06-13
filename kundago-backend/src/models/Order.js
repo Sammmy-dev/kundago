@@ -66,6 +66,11 @@ const orderSchema = new mongoose.Schema(
       required: [true, 'Total amount is required'],
       min: [0, 'Total amount cannot be negative']
     },
+    deliveryFee: {
+      type: Number,
+      default: 0,
+      min: [0, 'Delivery fee cannot be negative']
+    },
     paymentMethod: {
       type: String,
       enum: {

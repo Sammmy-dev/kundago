@@ -157,7 +157,7 @@ export const createProduct = async (req, res) => {
   const uploadedImageUrls = [];
 
   try {
-    const { name, description, price, images, stock, isActive, category } = req.body;
+    const { name, description, price, images, stock, isActive, category, weight } = req.body;
 
     console.log('--- Debug Request ---');
     console.log('Content-Type:', req.headers['content-type']);
@@ -194,6 +194,7 @@ export const createProduct = async (req, res) => {
       images: allImages,
       stock,
       category,
+      weight,
       isActive: isActive !== undefined ? isActive : true
     });
 
@@ -242,7 +243,7 @@ export const createProduct = async (req, res) => {
 export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, price, images, stock, isActive, category } = req.body;
+    const { name, description, price, images, stock, isActive, category, weight } = req.body;
 
     const product = await Product.findById(id);
 
@@ -258,6 +259,7 @@ export const updateProduct = async (req, res) => {
     if (description !== undefined) product.description = description;
     if (price !== undefined) product.price = price;
     if (stock !== undefined) product.stock = stock;
+    if (weight !== undefined) product.weight = weight;
     if (isActive !== undefined) product.isActive = isActive;
     if (category !== undefined) product.category = category;
 

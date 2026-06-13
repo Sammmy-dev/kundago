@@ -45,6 +45,7 @@ export default function CheckoutScreen() {
   const isDark = useThemeStore((s) => s.isDark);
   const [items, setItems] = useState<CartItem[]>([]);
   const [total, setTotal] = useState(0);
+  const [deliveryFee, setDeliveryFee] = useState(0);
   const [loadingCart, setLoadingCart] = useState(true);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
@@ -58,7 +59,8 @@ export default function CheckoutScreen() {
       const res = await api.get('/cart');
       const cart = res.data?.data?.cart;
       setItems(cart?.items || []);
-      setTotal(cart?.totalAmount || 0);
+      setDeliveryFee(cart?.deliveryFee || 0);
+      setTotal(cart?.grandTotal || cart?.totalAmount || 0);
     } catch {
       setItems([]);
     } finally {
@@ -290,6 +292,10 @@ export default function CheckoutScreen() {
               </View>
             ))}
             <View className="h-px bg-surface-variant my-2" />
+            <View className="flex-row justify-between items-center mb-1">
+              <Text className="body-sm text-on-surface-variant">Delivery fee</Text>
+              <Text className="body-sm text-on-surface-variant">D{deliveryFee.toLocaleString()}</Text>
+            </View>
             <View className="flex-row justify-between items-center">
               <Text className="body-md font-bold text-on-surface">Total</Text>
               <Text className="headline-md text-primary font-black">
@@ -360,6 +366,14 @@ export default function CheckoutScreen() {
 
       {/* Bottom Bar */}
       <View className="bg-surface-container px-4 py-4 shadow-ambient">
+        <View className="flex-row justify-between items-center mb-1">
+          <Text className="body-sm text-on-surface-variant">
+            Delivery fee
+          </Text>
+          <Text className="body-sm text-on-surface-variant">
+            D{deliveryFee.toLocaleString()}
+          </Text>
+        </View>
         <View className="flex-row justify-between items-center mb-3">
           <Text className="body-md text-on-surface-variant font-semibold">
             Total

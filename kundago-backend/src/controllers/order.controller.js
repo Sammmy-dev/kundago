@@ -2,6 +2,7 @@ import { Order, Cart, Product, User } from '../models/index.js';
 import { PAYMENT_METHODS } from '../models/Order.js';
 import { logger } from '../config/index.js';
 import { sendOrderPlaced, sendOrderConfirmation } from '../utils/email.js';
+import { calculateDeliveryFee } from '../utils/delivery.js';
 
 /**
  * @desc    Checkout - Create order from cart
@@ -95,23 +96,33 @@ export const checkout = async (req, res) => {
       return {
         productId: cartItem.productId,
         quantity: cartItem.quantity,
-        priceAtTime: product.price // Use current price at checkout
+        priceAtTime: product.price
       };
     });
 
-    // Calculate total amount
-    const totalAmount = orderItems.reduce((sum, item) => {
+    // Calculate subtotal from items
+    const subtotal = orderItems.reduce((sum, item) => {
       return sum + item.priceAtTime * item.quantity;
     }, 0);
+
+    // Calculate delivery fee based on heaviest product
+    const productWeights = cart.items.map((cartItem) => {
+      const product = productMap.get(cartItem.productId.toString());
+      return product?.weight || 0;
+    });
+    const { fee: deliveryFee } = calculateDeliveryFee(productWeights);
+
+    const totalAmount = subtotal + deliveryFee;
 
     // Step 4: Create order with initial statuses
     const order = await Order.create({
       userId,
       items: orderItems,
       totalAmount,
+      deliveryFee,
       paymentMethod,
-      paymentStatus: 'PENDING', // Initial status per rules
-      orderStatus: 'PENDING', // Initial status per rules
+      paymentStatus: 'PENDING',
+      orderStatus: 'PENDING',
       deliveryAddress: deliveryAddress.trim()
     });
 
@@ -158,6 +169,7 @@ export const checkout = async (req, res) => {
           _id: order._id,
           items: order.items,
           totalAmount: order.totalAmount,
+          deliveryFee: order.deliveryFee,
           paymentMethod: order.paymentMethod,
           paymentStatus: order.paymentStatus,
           orderStatus: order.orderStatus,

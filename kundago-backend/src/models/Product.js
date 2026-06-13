@@ -38,6 +38,12 @@ const productSchema = new mongoose.Schema(
       min: [0, 'Stock cannot be negative'],
       default: 0
     },
+    weight: {
+      type: Number,
+      required: [true, 'Weight is required'],
+      min: [0, 'Weight cannot be negative'],
+      default: 0
+    },
     isActive: {
       type: Boolean,
       default: true

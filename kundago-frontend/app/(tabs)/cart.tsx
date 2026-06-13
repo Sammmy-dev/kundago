@@ -30,6 +30,7 @@ export default function CartScreen() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
+  const [deliveryFee, setDeliveryFee] = useState(0);
   const [updating, setUpdating] = useState<string | null>(null);
   const setCount = useCartCount((s) => s.setCount);
   const c = useThemeColors();
@@ -44,7 +45,8 @@ export default function CartScreen() {
       const cart = res.data?.data?.cart;
       const items = cart?.items || [];
       setItems(items);
-      setTotal(cart?.totalAmount || 0);
+      setDeliveryFee(cart?.deliveryFee || 0);
+      setTotal(cart?.grandTotal || cart?.totalAmount || 0);
       setCount(items.length);
     } catch {
       setItems([]);
@@ -192,6 +194,10 @@ export default function CartScreen() {
 
       {items.length > 0 && (
         <View className="absolute bottom-0 left-0 right-0 bg-surface-container px-4 py-4 shadow-ambient">
+          <View className="flex-row justify-between items-center mb-1">
+            <Text className="body-sm text-on-surface-variant">Delivery fee</Text>
+            <Text className="body-sm text-on-surface-variant">{formatPrice(deliveryFee)}</Text>
+          </View>
           <View className="flex-row justify-between items-center mb-3">
             <Text className="body-md text-on-surface-variant font-semibold">Total</Text>
             <Text className="headline-md text-primary font-black">{formatPrice(total)}</Text>
