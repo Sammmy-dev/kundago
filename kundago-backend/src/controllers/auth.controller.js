@@ -1,4 +1,4 @@
-import { User } from '../models/index.js';
+import { User, Cart, Address, Order, Parcel, Payment } from '../models/index.js';
 import { generateTokenForUser } from '../utils/index.js';
 import { logger } from '../config/index.js';
 import { sendPasswordResetEmail, sendPasswordResetConfirmation, sendWelcomeEmail, sendVerificationEmail } from '../utils/email.js';
@@ -665,6 +665,39 @@ export const verifyEmail = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Delete authenticated user's account and all associated data
+ * @route   DELETE /auth/account
+ * @access  Private
+ */
+export const deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    await Promise.all([
+      Cart.deleteMany({ userId }),
+      Address.deleteMany({ userId }),
+      Order.deleteMany({ userId }),
+      Parcel.deleteMany({ userId }),
+      Payment.deleteMany({ userId }),
+      User.findByIdAndDelete(userId)
+    ]);
+
+    logger.info('Account deleted', { userId });
+
+    res.status(200).json({
+      success: true,
+      message: 'Account deleted successfully'
+    });
+  } catch (error) {
+    logger.error('Delete account error:', { error: error.message });
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete account. Please try again.'
+    });
+  }
+};
+
 export default {
   register,
   login,
@@ -675,5 +708,6 @@ export default {
   verifyOTP,
   resetPassword,
   sendVerification,
-  verifyEmail
+  verifyEmail,
+  deleteAccount
 };

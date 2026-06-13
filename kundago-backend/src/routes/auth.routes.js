@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login, getProfile, updateProfile, logout, forgotPassword, verifyOTP, resetPassword, sendVerification, verifyEmail } from '../controllers/auth.controller.js';
+import { register, login, getProfile, updateProfile, logout, forgotPassword, verifyOTP, resetPassword, sendVerification, verifyEmail, deleteAccount } from '../controllers/auth.controller.js';
 import { requireAuth } from '../middleware/index.js';
 import { uploadUserProfile, handleUploadError, requireCloudinaryConfig } from '../middleware/upload.js';
 
@@ -248,6 +248,7 @@ router.put(
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post('/logout', requireAuth, logout);
+router.delete('/account', requireAuth, deleteAccount);
 
 /**
  * @swagger
