@@ -7,6 +7,7 @@ type User = {
   phone?: string;
   role: 'USER' | 'ADMIN';
   profileImage?: string | null;
+  isVerified?: boolean;
 };
 
 type AuthState = {

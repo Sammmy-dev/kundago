@@ -36,6 +36,16 @@ export const checkout = async (req, res) => {
       });
     }
 
+    // Require email verification before placing order
+    const user = await User.findById(userId).select('isVerified');
+    if (!user || !user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: 'Please verify your email before placing an order.',
+        code: 'EMAIL_NOT_VERIFIED'
+      });
+    }
+
     // Step 1: Validate cart exists and has items
     const cart = await Cart.findOne({ userId });
 

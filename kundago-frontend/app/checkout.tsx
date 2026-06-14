@@ -8,6 +8,7 @@ import { api } from '@/lib/api';
 import { useToast } from '@/lib/toast';
 import { useThemeColors } from '@/constants/theme';
 import { useThemeStore } from '@/lib/stores/theme';
+import { useAuthStore } from '@/lib/stores/auth';
 import { useStripe } from '@stripe/stripe-react-native';
 
 type CartItem = {
@@ -43,6 +44,7 @@ export default function CheckoutScreen() {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const c = useThemeColors();
   const isDark = useThemeStore((s) => s.isDark);
+  const user = useAuthStore((s) => s.user);
   const [items, setItems] = useState<CartItem[]>([]);
   const [total, setTotal] = useState(0);
   const [deliveryFee, setDeliveryFee] = useState(0);
@@ -101,6 +103,10 @@ export default function CheckoutScreen() {
   const WAVE_PAYMENT_URL = 'https://pay.wave.com/m/M_gm_AQGSLEdlneyq/c/gm/';
 
   const placeOrder = async () => {
+    if (!user?.isVerified) {
+      Alert.alert('Email not verified', 'Please verify your email before placing an order.');
+      return;
+    }
     if (!selectedAddress) {
       Alert.alert('Delivery Address', 'Please select or add a delivery address');
       return;
@@ -193,6 +199,25 @@ export default function CheckoutScreen() {
       </View>
 
       <ScrollView className="flex-1 px-4">
+        {!user?.isVerified && (
+          <View className="mb-4 p-4 rounded-lg flex-row items-center gap-3" style={{ backgroundColor: '#FEF3C7' }}>
+            <Feather name="alert-triangle" size={20} color="#D97706" />
+            <View className="flex-1">
+              <Text style={{ color: '#92400E', fontWeight: 600, fontSize: 14 }}>Email not verified</Text>
+              <Text style={{ color: '#92400E', fontSize: 13, marginTop: 2 }}>
+                Please verify your email before placing an order.
+              </Text>
+            </View>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => router.push(`/(auth)/verify-email?email=${encodeURIComponent(user?.email || '')}`)}
+              className="rounded-lg px-4 py-2" style={{ backgroundColor: '#D97706' }}
+            >
+              <Text style={{ color: '#ffffff', fontWeight: 700, fontSize: 13 }}>Verify</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Delivery Address */}
         <View className="mb-6">
           <Text className="label-sm text-on-surface-variant font-bold mb-3">

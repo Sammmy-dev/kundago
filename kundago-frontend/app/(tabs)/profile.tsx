@@ -85,6 +85,25 @@ export default function ProfileScreen() {
 
     <ScrollView className="flex-1 bg-surface">
 
+      {!user?.isVerified && (
+        <View className="mx-4 mb-4 p-4 rounded-lg flex-row items-center gap-3" style={{ backgroundColor: '#FEF3C7' }}>
+          <Feather name="alert-triangle" size={20} color="#D97706" />
+          <View className="flex-1">
+            <Text style={{ color: '#92400E', fontWeight: 600, fontSize: 14 }}>Email not verified</Text>
+            <Text style={{ color: '#92400E', fontSize: 13, marginTop: 2 }}>
+              Please check your inbox for the verification code.
+            </Text>
+          </View>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => router.push(`/(auth)/verify-email?email=${encodeURIComponent(user?.email || '')}`)}
+            className="rounded-lg px-4 py-2" style={{ backgroundColor: '#D97706' }}
+          >
+            <Text style={{ color: '#ffffff', fontWeight: 700, fontSize: 13 }}>Verify</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       <View className="px-4 mt-2 mb-6">
         <View className="rounded-lg p-6 items-center bg-surface-container">
           <View className="relative mb-4">
