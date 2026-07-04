@@ -448,11 +448,29 @@ export const softDeleteProduct = async (req, res) => {
  */
 export const getAdminProducts = async (req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 });
+    const { page = 1, limit = 20, search } = req.query;
+
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
+    const skip = (pageNum - 1) * limitNum;
+
+    const query = {};
+    if (search) {
+      query.name = { $regex: search, $options: 'i' };
+    }
+
+    const [total, products] = await Promise.all([
+      Product.countDocuments(query),
+      Product.find(query).sort({ createdAt: -1 }).skip(skip).limit(limitNum)
+    ]);
 
     res.status(200).json({
       success: true,
       count: products.length,
+      total,
+      totalPages: Math.ceil(total / limitNum),
+      currentPage: pageNum,
+      hasMore: pageNum * limitNum < total,
       data: {
         products
       }
