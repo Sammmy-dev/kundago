@@ -11,6 +11,12 @@ import { useThemeStore } from '@/lib/stores/theme';
 import { useAuthStore } from '@/lib/stores/auth';
 import { useStripe } from '@stripe/stripe-react-native';
 
+const generateIdempotencyKey = () =>
+  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+
 type CartItem = {
   productId: {
     _id: string;
@@ -119,9 +125,12 @@ export default function CheckoutScreen() {
         selectedAddress.address,
         selectedAddress.landmark,
       ].filter(Boolean).join(', ');
+      const idempotencyKey = generateIdempotencyKey();
       const orderRes = await api.post('/orders/checkout', {
         paymentMethod,
         deliveryAddress,
+      }, {
+        headers: { 'Idempotency-Key': idempotencyKey }
       });
       const orderId = orderRes.data?.data?.order?._id;
 

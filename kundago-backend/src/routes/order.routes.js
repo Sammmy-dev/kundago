@@ -5,6 +5,7 @@ import {
   getOrderById
 } from '../controllers/order.controller.js';
 import { requireAuth } from '../middleware/index.js';
+import { idempotencyMiddleware } from '../middleware/idempotency.js';
 
 const router = Router();
 
@@ -47,7 +48,7 @@ router.use(requireAuth);
  *       401:
  *         $ref: '#/components/schemas/UnauthorizedError'
  */
-router.post('/checkout', checkout);
+router.post('/checkout', idempotencyMiddleware, checkout);
 
 /**
  * @swagger
