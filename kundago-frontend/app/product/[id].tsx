@@ -1,5 +1,5 @@
 import '@/global.css';
-import { View, Text, TouchableOpacity, Image, ScrollView, ActivityIndicator, Alert, FlatList, useWindowDimensions } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ScrollView, ActivityIndicator, Alert, FlatList, Modal, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -30,6 +30,8 @@ export default function ProductDetailScreen() {
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [previewImage, setPreviewImage] = useState('');
   const insets = useSafeAreaInsets();
   const imageListRef = useRef<FlatList>(null);
   const { width } = useWindowDimensions();
@@ -91,11 +93,13 @@ export default function ProductDetailScreen() {
             setCurrentIndex(index);
           }}
           renderItem={({ item }) => (
-            <Image
-              source={item ? { uri: item } : undefined}
-              style={{ width, height: 288 }}
-              resizeMode="cover"
-            />
+            <TouchableOpacity activeOpacity={1} onPress={() => { setPreviewImage(item); setPreviewVisible(true) }}>
+              <Image
+                source={item ? { uri: item } : undefined}
+                style={{ width, height: 288 }}
+                resizeMode="cover"
+              />
+            </TouchableOpacity>
           )}
           keyExtractor={(_, i) => String(i)}
         />
@@ -187,6 +191,24 @@ export default function ProductDetailScreen() {
           </Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <Modal visible={previewVisible} transparent animationType="fade" onRequestClose={() => setPreviewVisible(false)}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' }}>
+          <TouchableOpacity
+            onPress={() => setPreviewVisible(false)}
+            style={{ position: 'absolute', top: 60, right: 20, zIndex: 10 }}
+          >
+            <Feather name="x" size={28} color="#ffffff" />
+          </TouchableOpacity>
+          {previewImage ? (
+            <Image
+              source={{ uri: previewImage }}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="contain"
+            />
+          ) : null}
+        </View>
+      </Modal>
     </View>
   );
 }

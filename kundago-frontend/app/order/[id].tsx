@@ -12,7 +12,7 @@ type OrderItem = {
     _id: string;
     name: string;
     images: string[];
-  };
+  } | null;
   quantity: number;
   priceAtTime: number;
 };
@@ -150,12 +150,12 @@ export default function OrderDetailScreen() {
           {order.items.map((item, i) => (
             <View key={i} className={`flex-row items-center gap-3 ${i < order.items.length - 1 ? 'mb-3 pb-3' : ''}`}>
               <Image
-                source={item.productId.images?.[0] ? { uri: item.productId.images[0] } : undefined}
+                source={item.productId?.images?.[0] ? { uri: item.productId.images[0] } : undefined}
                 className="w-16 h-16 rounded-lg"
                 resizeMode="cover"
               />
               <View className="flex-1">
-                <Text className="body-md font-bold text-on-surface" numberOfLines={2}>{item.productId.name}</Text>
+                <Text className="body-md font-bold text-on-surface" numberOfLines={2}>{item.productId?.name || 'Unavailable'}</Text>
                 <Text className="body-sm text-on-surface-variant">D{item.priceAtTime.toLocaleString()} × {item.quantity}</Text>
               </View>
               <Text className="body-md font-bold text-primary">D{(item.priceAtTime * item.quantity).toLocaleString()}</Text>

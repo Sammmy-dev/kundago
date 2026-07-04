@@ -18,7 +18,7 @@ type CartItem = {
     price: number;
     images: string[];
     stock: number;
-  };
+  } | null;
   quantity: number;
   priceAtTime: number;
 };
@@ -286,14 +286,14 @@ export default function CheckoutScreen() {
             ORDER SUMMARY
           </Text>
           <View className="bg-surface-container rounded-lg shadow-ambient p-4">
-            {items.map((item) => (
+            {items.map((item, i) => (
               <View
-                key={item.productId._id}
+                key={item.productId?._id || i}
                 className="flex-row items-center gap-3 mb-3"
               >
                 <Image
                   source={
-                    item.productId.images?.[0]
+                    item.productId?.images?.[0]
                       ? { uri: item.productId.images[0] }
                       : undefined
                   }
@@ -305,7 +305,7 @@ export default function CheckoutScreen() {
                     className="body-md font-bold text-on-surface"
                     numberOfLines={1}
                   >
-                    {item.productId.name}
+                    {item.productId?.name || 'Unavailable'}
                   </Text>
                   <Text className="body-sm text-on-surface-variant">
                     Qty: {item.quantity}

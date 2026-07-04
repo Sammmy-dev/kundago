@@ -18,7 +18,7 @@ type CartItem = {
     price: number;
     images: string[];
     stock: number;
-  };
+  } | null;
   quantity: number;
   priceAtTime: number;
 };
@@ -100,12 +100,12 @@ export default function CartScreen() {
       <View className="bg-surface-container rounded-lg p-4 mb-3 shadow-ambient flex-row">
         <View className="flex-row flex-1 gap-3">
           <Image
-            source={product.images?.[0] ? { uri: product.images[0] } : undefined}
+            source={product?.images?.[0] ? { uri: product.images[0] } : undefined}
             className="w-20 h-20 rounded-lg"
             resizeMode="cover"
           />
           <View className="flex-1 justify-between">
-            <Text className="body-md font-bold text-on-surface" numberOfLines={2}>{product.name}</Text>
+            <Text className="body-md font-bold text-on-surface" numberOfLines={2}>{product?.name || 'Unavailable'}</Text>
             <View className="flex-row items-center justify-between">
               <Text className="body-sm text-on-surface-variant">{formatPrice(item.priceAtTime)} × {item.quantity}</Text>
               <Text className="body-md text-primary font-black">{formatPrice(item.priceAtTime * item.quantity)}</Text>
@@ -187,7 +187,7 @@ export default function CartScreen() {
         <FlatList
           data={items}
           renderItem={renderItem}
-          keyExtractor={(item) => item.productId._id}
+          keyExtractor={(item, i) => item.productId?._id || `cart-${i}`}
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 120 }}
         />
       )}

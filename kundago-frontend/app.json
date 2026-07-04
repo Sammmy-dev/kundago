@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "kundago-frontend",
-    "slug": "kundago-frontend",
+    "name": "kundago",
+    "slug": "kundago",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon-1.png",
@@ -12,6 +12,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.kundago.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
