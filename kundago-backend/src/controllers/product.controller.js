@@ -130,7 +130,9 @@ export const getProductById = async (req, res) => {
 const destroyCloudinaryImage = async (imageUrl) => {
   try {
     const urlParts = imageUrl.split('/');
-    const publicIdWithExtension = urlParts.slice(-2).join('/');
+    const uploadIndex = urlParts.indexOf('upload');
+    if (uploadIndex === -1) return;
+    const publicIdWithExtension = urlParts.slice(uploadIndex + 2).join('/');
     const publicId = publicIdWithExtension.split('.')[0];
     await cloudinary.uploader.destroy(publicId);
   } catch (error) {
@@ -265,6 +267,7 @@ export const updateProduct = async (req, res) => {
     if (category !== undefined) product.category = category;
 
     // Handle images
+    const oldImages = [...product.images];
     let newImages = [];
 
     if (req.files && req.files.length > 0) {
@@ -285,6 +288,12 @@ export const updateProduct = async (req, res) => {
     }
 
     await product.save();
+
+    // Clean up removed images from Cloudinary
+    const removedImages = oldImages.filter((url) => !product.images.includes(url));
+    if (removedImages.length > 0) {
+      cleanupCloudinaryImages(removedImages);
+    }
 
     logger.info(`Product updated: ${product.name}`, { productId: product._id });
 
