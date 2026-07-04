@@ -30,7 +30,7 @@ const userProfileStorage = new CloudinaryStorage({
   params: {
     folder: 'users/profile-images',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation: [{ width: 500, height: 500, crop: 'limit' }]
+    transformation: [{ width: 500, height: 500, crop: 'limit', quality: 70 }]
   }
 });
 
@@ -42,7 +42,7 @@ const productImageStorage = new CloudinaryStorage({
   params: {
     folder: 'products/images',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation: [{ width: 1200, height: 1200, crop: 'limit' }]
+    transformation: [{ width: 1200, height: 1200, crop: 'limit', quality: 70 }]
   }
 });
 
